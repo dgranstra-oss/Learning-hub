@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Hub</title>
+<style>
+  :root{
+    --navy:#1a1a1a;
+    --gold:#e63946;
+    --teal:#4a4a4a;
+    --cream:#f5f1ee;
+    --red:#d62828;
+    --green:#3aa655;
+    --purple:#2b2b2b;
+    --blue:#2b6cb0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+    background:linear-gradient(160deg, #1a0000 0%, #4a0404 35%, #7a0c0c 65%, #1a0000 100%);
+    color:var(--navy);
+    padding:24px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+  .header{
+    text-align:center;
+    margin-bottom:48px;
+  }
+  .header h1{
+    font-size:2.8em;
+    margin:0;
+    color:#ffffff;
+    text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .header p{
+    color:#f4a8a8;
+    font-weight:bold;
+    margin:10px 0 0;
+    font-size:1.1em;
+  }
+  .profiles{
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    flex-wrap:wrap;
+    max-width:780px;
+    margin:0 auto;
+  }
+  .profile-card{
+    background:white;
+    border:4px solid var(--navy);
+    border-radius:24px;
+    padding:44px 36px;
+    text-align:center;
+    width:300px;
+    cursor:pointer;
+    text-decoration:none;
+    color:var(--navy);
+    transition:transform 0.15s ease;
+  }
+  .profile-card:hover{
+    transform:translateY(-4px);
+  }
+  .avatar{
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    margin:0 auto 20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:3em;
+    font-weight:bold;
+    color:white;
+    overflow:hidden;
+  }
+  .avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .avatar.bentley{ background:var(--red); border:4px solid var(--red); }
+  .avatar.bradley{ background:var(--blue); border:4px solid var(--blue); }
+  .profile-card h2{
+    margin:0 0 8px;
+    font-size:1.8em;
+  }
+  .profile-card .sub{
+    color:var(--teal);
+    font-size:1em;
+    font-weight:bold;
+  }
+  .tag{
+    display:inline-block;
+    background:var(--purple);
+    color:white;
+    font-size:0.85em;
+    font-weight:bold;
+    padding:5px 14px;
+    border-radius:20px;
+    margin-top:18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Learning Hub</h1>
+  <p>Tap your name to start practicing!</p>
+</div>
+
+<div class="profiles">
+  <a class="profile-card" href="bentley_hub.html">
+    <div class="avatar bentley"><img src="bentley_photo.jpg" alt="Bentley"></div>
+    <h2>Bentley</h2>
+    <div class="sub">Math &amp; Reading</div>
+    <span class="tag">Math · Reading</span>
+  </a>
+
+  <a class="profile-card" href="bradley_hub.html">
+    <div class="avatar bradley"><img src="bradley_photo.jpg" alt="Bradley"></div>
+    <h2>Bradley</h2>
+    <div class="sub">Math &amp; Reading</div>
+    <span class="tag">Math · Reading</span>
+  </a>
+</div>
+
+</body>
+</html>
