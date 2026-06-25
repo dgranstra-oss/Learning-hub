@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bradley's Spelling Practice</title>
+<style>
+  :root{
+    --navy:#1a1a1a;
+    --gold:#e63946;
+    --teal:#4a4a4a;
+    --cream:#f5f1ee;
+    --red:#d62828;
+    --green:#3aa655;
+    --purple:#2b2b2b;
+    --blue:#2b6cb0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+    background:linear-gradient(160deg, #1a0000 0%, #4a0404 35%, #7a0c0c 65%, #1a0000 100%);
+    color:var(--navy);
+    padding:24px;
+    min-height:100vh;
+  }
+  a.backlink{
+    display:inline-block;
+    color:#f4a8a8;
+    font-weight:bold;
+    text-decoration:none;
+    margin-bottom:10px;
+  }
+  .header{ text-align:center; margin-bottom:20px; }
+  .header h1{
+    font-size:2.1em;
+    margin:0;
+    color:#ffffff;
+    text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .header p{ color:#f4a8a8; font-weight:bold; margin:6px 0 0; }
+  .stats{ display:flex; justify-content:center; gap:24px; margin-bottom:24px; flex-wrap:wrap; }
+  .stat{ background:white; border:3px solid var(--navy); border-radius:12px; padding:10px 18px; text-align:center; min-width:110px; }
+  .stat .num{ font-size:1.6em; font-weight:bold; color:var(--navy); }
+  .stat .label{ font-size:0.85em; color:var(--teal); font-weight:bold; }
+  .card{
+    max-width:560px;
+    margin:0 auto;
+    background:white;
+    border:4px solid var(--navy);
+    border-radius:20px;
+    padding:28px 26px;
+    text-align:center;
+  }
+  .tag{
+    display:inline-block;
+    background:var(--purple);
+    color:white;
+    font-size:0.8em;
+    font-weight:bold;
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:14px;
+  }
+  .hear-btn{
+    background:var(--blue);
+    color:white;
+    font-size:1.1em;
+    padding:14px 26px;
+    border-radius:14px;
+    border:none;
+    cursor:pointer;
+    margin-bottom:20px;
+  }
+  .hear-btn:hover{ background:#225a92; }
+  .slots{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+    min-height:64px;
+  }
+  .slot{
+    width:48px;
+    height:56px;
+    border:3px solid var(--teal);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.8em;
+    font-weight:bold;
+    background:var(--cream);
+    cursor:pointer;
+  }
+  .slot.empty{ background:white; }
+  .tray{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+  .tile{
+    width:48px;
+    height:56px;
+    border:3px solid var(--navy);
+    border-radius:10px;
+    background:white;
+    font-size:1.6em;
+    font-weight:bold;
+    cursor:pointer;
+  }
+  .tile:hover{ background:#f0f0f0; }
+  .tile:disabled{ opacity:0.25; cursor:default; }
+  .actions{ margin-top:10px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+  button{ border:none; border-radius:10px; padding:12px 22px; font-size:1.05em; font-weight:bold; cursor:pointer; }
+  #checkBtn{ background:var(--teal); color:white; }
+  #checkBtn:hover{ background:#666; }
+  #checkBtn:disabled{ opacity:0.4; cursor:default; }
+  #clearBtn{ background:white; border:2px solid var(--teal); color:var(--teal); }
+  #nextBtn{ background:var(--gold); color:white; display:none; }
+  #nextBtn:hover{ background:#c0202d; }
+  #skipBtn{ background:white; border:2px solid var(--teal); color:var(--teal); }
+  .feedback{ margin-top:18px; font-size:1.3em; font-weight:bold; min-height:32px; }
+  .correct{ color:var(--green); }
+  .incorrect{ color:var(--red); }
+  .explain{
+    margin-top:14px;
+    background:#fff4e0;
+    border-left:5px solid var(--gold);
+    border-radius:8px;
+    padding:12px 16px;
+    text-align:left;
+    font-size:1.05em;
+    display:none;
+  }
+  .explain.show{ display:block; }
+  .topics{ text-align:center; margin-top:24px; font-size:0.9em; color:#e3b8b8; }
+  .overlay{
+    display:none;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(27,42,74,0.85);
+    z-index:999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .overlay.show{ display:flex; }
+  .game-card{
+    background:var(--cream);
+    border:5px solid var(--gold);
+    border-radius:20px;
+    padding:24px;
+    max-width:480px;
+    width:100%;
+    text-align:center;
+  }
+  .game-card h2{ margin:0 0 6px; color:var(--navy); }
+  .game-card .sub{ color:var(--purple); font-weight:bold; margin-bottom:16px; }
+  .memory-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin:0 auto 18px; max-width:400px; }
+  .memory-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.8em;
+    cursor:pointer;
+    user-select:none;
+    transition:transform 0.15s;
+  }
+  .memory-tile.flipped{ background:white; border:3px solid var(--teal); }
+  .memory-tile.matched{ background:#d4f5e1; border:3px solid var(--green); cursor:default; }
+  .game-status{ font-weight:bold; color:var(--navy); margin-bottom:14px; min-height:24px; }
+  .closeGameBtn{ background:var(--teal); color:white; }
+  .closeGameBtn:hover{ background:#239e92; }
+  .simon-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin:0 auto 18px; max-width:280px; }
+  .simon-tile{ aspect-ratio:1/1; border-radius:16px; cursor:pointer; opacity:0.55; transition:opacity 0.15s, transform 0.1s; }
+  .simon-tile.lit{ opacity:1; transform:scale(0.96); }
+  .simon-tile.red{ background:#d62828; }
+  .simon-tile.green{ background:#2a9d8f; }
+  .simon-tile.teal{ background:#1d3557; }
+  .simon-tile.gold{ background:#e9c46a; }
+  .seq-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin:0 auto 18px; max-width:400px; }
+  .seq-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.6em;
+    font-weight:bold;
+    cursor:pointer;
+    user-select:none;
+  }
+  .seq-tile.used{ background:#d4f5e1; color:var(--green); cursor:default; }
+  .seq-tile.wrong{ background:var(--red); }
+</style>
+</head>
+<body>
+
+<a class="backlink" href="bradley_hub.html">&larr; Back to profile</a>
+<div class="header">
+  <h1>✏️ Bradley's Spelling Practice</h1>
+  <p>Listen to the word, then click the letters in order!</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="scoreNum">0</div><div class="label">Correct</div></div>
+  <div class="stat"><div class="num" id="attemptNum">0</div><div class="label">Attempted</div></div>
+  <div class="stat"><div class="num" id="streakNum">0</div><div class="label">Streak 🔥</div></div>
+  <div class="stat"><div class="num" id="bestNum">0</div><div class="label">Best Streak</div></div>
+</div>
+
+<div class="card">
+  <div class="tag" id="tag">SPELLING</div>
+  <button class="hear-btn" id="hearBtn" onclick="playWord()">🔊 Hear the word</button>
+  <div class="slots" id="slots"></div>
+  <div class="tray" id="tray"></div>
+  <div class="actions">
+    <button id="clearBtn" onclick="clearAttempt()">Clear</button>
+    <button id="checkBtn" onclick="checkSpelling()" disabled>Check</button>
+    <button id="skipBtn" onclick="skipWord()">Skip</button>
+    <button id="nextBtn" onclick="nextWord()">Next Word →</button>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explainBox"></div>
+</div>
+
+<div class="topics">New words keep coming — keep going as long as you like!</div>
+
+<div class="overlay" id="rewardOverlay">
+  <div class="game-card">
+    <h2 id="gameTitle">🎉 12 in a Row!</h2>
+    <div class="sub" id="gameSub">You unlocked a game!</div>
+    <div class="game-status" id="gameStatus">Find all the matching pairs!</div>
+    <div id="gameContent"></div>
+    <button class="closeGameBtn" id="backToSpellingBtn" onclick="closeRewardGame()">Back to Spelling →</button>
+  </div>
+</div>
+
+<script>
+let score = 0, attempts = 0, streak = 0, best = 0;
+let currentWord = '';
+let misses = 0;
+let placed = [];
+let wordPool = [];
+let wordIdx = 0;
+
+const SPELLING_WORDS = [
+  'cat','dog','sun','run','jump','frog','nest','milk','train','happy',
+  'friend','school','write','again','because','water','little','people',
+  'before','every','green','black','sleep','think','round','stop','open',
+  'about','found','first','these'
+];
+
+function randInt(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function speak(text, onDone) {
+  if (!window.speechSynthesis) { if (onDone) onDone(); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.8;
+  u.onend = () => { if (onDone) onDone(); };
+  u.onerror = () => { if (onDone) onDone(); };
+  window.speechSynthesis.speak(u);
+}
+
+function playWord(){
+  speak(currentWord);
+}
+
+function buildPool(){
+  wordPool = shuffle(SPELLING_WORDS);
+  wordIdx = 0;
+}
+
+function nextWord(){
+  if (wordIdx >= wordPool.length) {
+    wordPool = shuffle(wordPool);
+    wordIdx = 0;
+  }
+  currentWord = wordPool[wordIdx];
+  wordIdx++;
+  misses = 0;
+  placed = new Array(currentWord.length).fill(null);
+
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('explainBox').classList.remove('show');
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('checkBtn').disabled = true;
+  document.getElementById('checkBtn').style.display = 'inline-block';
+  document.getElementById('clearBtn').style.display = 'inline-block';
+  document.getElementById('skipBtn').style.display = 'inline-block';
+
+  renderSlots();
+  renderTray();
+  setTimeout(playWord, 300);
+}
+
+function skipWord(){
+  nextWord();
+}
+
+function renderSlots(){
+  const slotsEl = document.getElementById('slots');
+  slotsEl.innerHTML = '';
+  for (let i = 0; i < currentWord.length; i++) {
+    const slot = document.createElement('div');
+    slot.className = placed[i] ? 'slot' : 'slot empty';
+    slot.textContent = placed[i] ? placed[i].letter : '';
+    if (placed[i]) {
+      slot.onclick = () => removeFromSlot(i);
+    }
+    slotsEl.appendChild(slot);
+  }
+  document.getElementById('checkBtn').disabled = placed.some(p => p === null);
+}
+
+function renderTray(){
+  const trayEl = document.getElementById('tray');
+  trayEl.innerHTML = '';
+  const letters = shuffle(currentWord.split(''));
+  trayEl.dataset.letters = JSON.stringify(letters);
+  letters.forEach((letter, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tile';
+    btn.textContent = letter;
+    btn.dataset.tileId = i;
+    btn.onclick = () => placeLetter(letter, btn);
+    trayEl.appendChild(btn);
+  });
+}
+
+function placeLetter(letter, tileBtn){
+  const emptyIndex = placed.findIndex(p => p === null);
+  if (emptyIndex === -1) return;
+  placed[emptyIndex] = { letter, tileBtn };
+  tileBtn.disabled = true;
+  renderSlots();
+}
+
+function removeFromSlot(slotIndex){
+  const entry = placed[slotIndex];
+  if (!entry) return;
+  entry.tileBtn.disabled = false;
+  placed[slotIndex] = null;
+  renderSlots();
+}
+
+function clearAttempt(){
+  placed.forEach(entry => { if (entry) entry.tileBtn.disabled = false; });
+  placed = new Array(currentWord.length).fill(null);
+  renderSlots();
+}
+
+function checkSpelling(){
+  const attemptStr = placed.map(p => p.letter).join('');
+  const fb = document.getElementById('feedback');
+  const ex = document.getElementById('explainBox');
+
+  if (attemptStr === currentWord) {
+    attempts++;
+    score++; streak++;
+    if (streak > best) best = streak;
+    fb.textContent = '✅ Correct! Great spelling.';
+    fb.className = 'feedback correct';
+    ex.classList.remove('show');
+    updateStats();
+    document.getElementById('checkBtn').style.display = 'none';
+    document.getElementById('clearBtn').style.display = 'none';
+    document.getElementById('skipBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+  } else {
+    misses++;
+    if (misses >= 2) {
+      attempts++;
+      streak = 0;
+      fb.textContent = "❌ Not quite — here's the right spelling:";
+      fb.className = 'feedback incorrect';
+      ex.innerHTML = `<div class="vlabel">The word is spelled:</div><div class="vstep" style="font-size:1.4em;letter-spacing:4px;"><b>${currentWord.toUpperCase()}</b></div>`;
+      ex.classList.add('show');
+      updateStats();
+      document.getElementById('checkBtn').style.display = 'none';
+      document.getElementById('clearBtn').style.display = 'none';
+      document.getElementById('skipBtn').style.display = 'none';
+      document.getElementById('nextBtn').style.display = 'inline-block';
+    } else {
+      fb.textContent = 'Not quite — listen again and try once more!';
+      fb.className = 'feedback incorrect';
+      clearAttempt();
+      playWord();
+    }
+  }
+}
+
+function updateStats(){
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('attemptNum').textContent = attempts;
+  document.getElementById('streakNum').textContent = streak;
+  document.getElementById('bestNum').textContent = best;
+  if (streak > 0 && streak % 12 === 0) {
+    openRewardGame();
+  }
+}
+
+// ---- Reward Games (rotates through 3 different mini-games) ----
+let rewardCount = 0;
+const EMOJIS = ['🚀','⭐','🐉','🍕','🎲','🦄','🌈','🎮'];
+let memState = { first:null, lock:false, matchedCount:0 };
+let seqState = { next:1 };
+let simonState = { sequence:[], playerStep:0, playing:false };
+
+function openRewardGame(){
+  const overlay = document.getElementById('rewardOverlay');
+  overlay.classList.add('show');
+  const gameType = rewardCount % 3;
+  rewardCount++;
+  if(gameType === 0) setupMemoryGame();
+  else if(gameType === 1) setupSequenceGame();
+  else setupSimonGame();
+}
+
+function closeRewardGame(){
+  document.getElementById('rewardOverlay').classList.remove('show');
+  simonState.playing = false;
+}
+
+function setupMemoryGame(){
+  document.getElementById('gameTitle').textContent = '🎉 12 in a Row!';
+  document.getElementById('gameSub').textContent = 'You unlocked Memory Match!';
+  document.getElementById('gameStatus').textContent = 'Find all the matching pairs!';
+  const chosen = [...EMOJIS].sort(()=>Math.random()-0.5).slice(0,6);
+  let deck = [...chosen, ...chosen].sort(()=>Math.random()-0.5);
+  memState = { first:null, lock:false, matchedCount:0 };
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="memory-grid" id="memoryGrid"></div>';
+  const grid = document.getElementById('memoryGrid');
+  deck.forEach((emoji, idx)=>{
+    const tile = document.createElement('div');
+    tile.className = 'memory-tile';
+    tile.dataset.idx = idx;
+    tile.dataset.emoji = emoji;
+    tile.textContent = '❓';
+    tile.onclick = ()=>flipTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function flipTile(tile){
+  if(memState.lock) return;
+  if(tile.classList.contains('flipped') || tile.classList.contains('matched')) return;
+  tile.classList.add('flipped');
+  tile.textContent = tile.dataset.emoji;
+  if(memState.first === null){
+    memState.first = tile;
+  } else {
+    const first = memState.first, second = tile;
+    if(first.dataset.emoji === second.dataset.emoji){
+      first.classList.add('matched');
+      second.classList.add('matched');
+      memState.first = null;
+      memState.matchedCount++;
+      if(memState.matchedCount === 6){
+        document.getElementById('gameStatus').textContent = '🏆 You matched them all! Great job!';
+      }
+    } else {
+      memState.lock = true;
+      setTimeout(()=>{
+        first.classList.remove('flipped'); first.textContent = '❓';
+        second.classList.remove('flipped'); second.textContent = '❓';
+        memState.first = null; memState.lock = false;
+      }, 700);
+    }
+  }
+}
+
+function setupSequenceGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Another Streak!';
+  document.getElementById('gameSub').textContent = 'You unlocked Number Rush!';
+  document.getElementById('gameStatus').textContent = 'Click the numbers 1 → 12 in order, as fast as you can!';
+  seqState = { next:1 };
+  const nums = Array.from({length:12}, (_,i)=>i+1).sort(()=>Math.random()-0.5);
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="seq-grid" id="seqGrid"></div>';
+  const grid = document.getElementById('seqGrid');
+  nums.forEach(n=>{
+    const tile = document.createElement('div');
+    tile.className = 'seq-tile';
+    tile.textContent = n;
+    tile.dataset.num = n;
+    tile.onclick = ()=>clickSeqTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function clickSeqTile(tile){
+  const num = Number(tile.dataset.num);
+  if(tile.classList.contains('used')) return;
+  if(num === seqState.next){
+    tile.classList.add('used');
+    seqState.next++;
+    if(seqState.next === 13){
+      document.getElementById('gameStatus').textContent = '🏆 Awesome! You got them all in order!';
+    }
+  } else {
+    tile.classList.add('wrong');
+    setTimeout(()=>tile.classList.remove('wrong'), 300);
+  }
+}
+
+function setupSimonGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Streak Power!';
+  document.getElementById('gameSub').textContent = 'You unlocked Color Memory!';
+  document.getElementById('gameStatus').textContent = 'Watch the pattern, then repeat it!';
+  simonState = { sequence:[], playerStep:0, playing:false };
+  const colors = ['red','green','teal','gold'];
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="simon-grid" id="simonGrid"></div>';
+  const grid = document.getElementById('simonGrid');
+  colors.forEach(c=>{
+    const tile = document.createElement('div');
+    tile.className = 'simon-tile ' + c;
+    tile.dataset.color = c;
+    tile.onclick = ()=>simonClick(tile);
+    grid.appendChild(tile);
+  });
+  simonState.sequence = [colors[randInt(0,3)]];
+  setTimeout(()=>playSimonSequence(), 600);
+}
+
+function playSimonSequence(){
+  simonState.playing = true;
+  simonState.playerStep = 0;
+  document.getElementById('gameStatus').textContent = 'Watch closely...';
+  const grid = document.getElementById('simonGrid');
+  let i = 0;
+  const interval = setInterval(()=>{
+    if(i > 0){
+      const prevTile = grid.querySelector(`[data-color="${simonState.sequence[i-1]}"]`);
+      if(prevTile) prevTile.classList.remove('lit');
+    }
+    if(i >= simonState.sequence.length){
+      clearInterval(interval);
+      simonState.playing = false;
+      document.getElementById('gameStatus').textContent = `Your turn! Repeat the pattern (${simonState.sequence.length} step${simonState.sequence.length>1?'s':''}).`;
+      return;
+    }
+    const tile = grid.querySelector(`[data-color="${simonState.sequence[i]}"]`);
+    if(tile) tile.classList.add('lit');
+    i++;
+  }, 700);
+}
+
+function simonClick(tile){
+  if(simonState.playing) return;
+  const color = tile.dataset.color;
+  tile.classList.add('lit');
+  setTimeout(()=>tile.classList.remove('lit'), 250);
+  if(color === simonState.sequence[simonState.playerStep]){
+    simonState.playerStep++;
+    if(simonState.playerStep === simonState.sequence.length){
+      if(simonState.sequence.length >= 6){
+        document.getElementById('gameStatus').textContent = '🏆 Amazing memory! You completed it!';
+        return;
+      }
+      const colors = ['red','green','teal','gold'];
+      simonState.sequence.push(colors[randInt(0,3)]);
+      document.getElementById('gameStatus').textContent = 'Nice! Get ready for the next round...';
+      setTimeout(()=>playSimonSequence(), 900);
+    }
+  } else {
+    document.getElementById('gameStatus').textContent = '❌ Oops, that broke the pattern. Try again!';
+    simonState.sequence = [simonState.sequence[0]];
+    setTimeout(()=>playSimonSequence(), 1000);
+  }
+}
+
+buildPool();
+nextWord();
+</script>
+</body>
+</html>

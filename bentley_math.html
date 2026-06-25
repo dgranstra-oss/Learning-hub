@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bentley's Math Mission</title>
+<style>
+  :root{
+    --navy:#1a1a1a;
+    --gold:#e63946;
+    --teal:#4a4a4a;
+    --cream:#f5f1ee;
+    --red:#d62828;
+    --green:#3aa655;
+    --purple:#2b2b2b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+    background:linear-gradient(160deg, #1a0000 0%, #4a0404 35%, #7a0c0c 65%, #1a0000 100%);
+    color:var(--navy);
+    padding:24px;
+    min-height:100vh;
+  }
+  .header h1{
+    font-size:2.1em;
+    margin:0;
+    color:#ffffff;
+    text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .header p{
+    color:#f4a8a8;
+    font-weight:bold;
+    margin:6px 0 0;
+  }
+  .header{
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .stats{
+    display:flex;
+    justify-content:center;
+    gap:24px;
+    margin-bottom:24px;
+    flex-wrap:wrap;
+  }
+  .stat{
+    background:white;
+    border:3px solid var(--navy);
+    border-radius:12px;
+    padding:10px 18px;
+    text-align:center;
+    min-width:110px;
+  }
+  .stat .num{
+    font-size:1.6em;
+    font-weight:bold;
+    color:var(--navy);
+  }
+  .stat .label{
+    font-size:0.85em;
+    color:var(--teal);
+    font-weight:bold;
+  }
+  .card{
+    max-width:560px;
+    margin:0 auto;
+    background:white;
+    border:4px solid var(--navy);
+    border-radius:20px;
+    padding:28px 26px;
+    text-align:center;
+  }
+  .tag{
+    display:inline-block;
+    background:var(--purple);
+    color:white;
+    font-size:0.8em;
+    font-weight:bold;
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:14px;
+    letter-spacing:0.5px;
+  }
+  .qtext{
+    font-size:2em;
+    font-weight:bold;
+    margin:10px 0 22px;
+  }
+  input#answer{
+    width:140px;
+    font-size:1.5em;
+    padding:8px 10px;
+    border:3px solid var(--teal);
+    border-radius:10px;
+    text-align:center;
+  }
+  input#answer::-webkit-outer-spin-button,
+  input#answer::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+  input#answer{
+    -moz-appearance:textfield;
+  }
+  .actions{
+    margin-top:18px;
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  button{
+    border:none;
+    border-radius:10px;
+    padding:12px 22px;
+    font-size:1.05em;
+    font-weight:bold;
+    cursor:pointer;
+  }
+  #checkBtn{ background:var(--teal); color:white; }
+  #checkBtn:hover{ background:#239e92; }
+  #nextBtn{ background:var(--gold); color:var(--navy); display:none; }
+  #nextBtn:hover{ background:#e0961f; }
+  .feedback{
+    margin-top:18px;
+    font-size:1.3em;
+    font-weight:bold;
+    min-height:32px;
+  }
+  .correct{ color:var(--green); }
+  .incorrect{ color:var(--red); }
+  .explain{
+    margin-top:14px;
+    background:#fff4e0;
+    border-left:5px solid var(--gold);
+    border-radius:8px;
+    padding:12px 16px;
+    text-align:left;
+    font-size:1.05em;
+    display:none;
+  }
+  .explain.show{ display:block; }
+  .vmath{
+    font-family:'Courier New', monospace;
+    display:inline-block;
+    margin:22px 0 6px;
+  }
+  .vrow{
+    display:flex;
+    justify-content:flex-end;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .vop{
+    width:18px;
+    text-align:center;
+    font-weight:bold;
+    align-self:center;
+  }
+  .vcell{
+    position:relative;
+    width:32px;
+    height:34px;
+    text-align:center;
+    font-size:1.3em;
+    font-weight:bold;
+  }
+  .vcell .sup{
+    position:absolute;
+    top:-22px;
+    left:0;
+    right:0;
+    font-size:0.6em;
+    color:var(--red);
+    font-weight:bold;
+    white-space:nowrap;
+  }
+  .vcell .strike{
+    text-decoration:line-through;
+    color:#999;
+  }
+  .vline{
+    border-top:3px solid var(--navy);
+    margin:2px 0;
+  }
+  .vlabel{
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+    font-size:0.85em;
+    color:var(--navy);
+    margin:6px 0 4px;
+    font-weight:bold;
+    line-height:1.4;
+  }
+  .vstep{
+    margin:10px 0;
+  }
+  .division-box{
+    display:inline-flex;
+    align-items:flex-start;
+    font-family:'Courier New', monospace;
+    font-size:1.3em;
+    font-weight:bold;
+  }
+  .division-divisor{
+    padding-right:8px;
+    border-right:3px solid var(--navy);
+    margin-right:6px;
+  }
+  .division-top{
+    border-top:3px solid var(--navy);
+    padding-top:2px;
+  }
+  .fraction-visual{
+    display:inline-block;
+    text-align:center;
+    font-family:'Courier New', monospace;
+    font-size:1.3em;
+    font-weight:bold;
+    vertical-align:middle;
+    margin:0 8px;
+  }
+  .fraction-visual .fnum, .fraction-visual .fden{
+    display:block;
+    padding:0 6px;
+  }
+  .fraction-visual .fnum{
+    border-bottom:3px solid var(--navy);
+  }
+  .fraction-visual .fnum .strike, .fraction-visual .fden .strike{
+    text-decoration:line-through;
+    color:#999;
+    font-size:0.8em;
+  }
+  .fraction-visual .new-val{
+    color:var(--green);
+  }
+  .arrow-down{
+    text-align:center;
+    font-size:1.1em;
+    margin:2px 0;
+    color:var(--navy);
+  }
+  .streakflame{
+    color:var(--gold);
+  }
+  .topics{
+    text-align:center;
+    margin-top:24px;
+    font-size:0.9em;
+    color:#e3b8b8;
+  }
+  .overlay{
+    display:none;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(27,42,74,0.85);
+    z-index:999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .overlay.show{ display:flex; }
+  .game-card{
+    background:var(--cream);
+    border:5px solid var(--gold);
+    border-radius:20px;
+    padding:24px;
+    max-width:480px;
+    width:100%;
+    text-align:center;
+  }
+  .game-card h2{
+    margin:0 0 6px;
+    color:var(--navy);
+  }
+  .game-card .sub{
+    color:var(--purple);
+    font-weight:bold;
+    margin-bottom:16px;
+  }
+  .memory-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:400px;
+  }
+  .memory-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.8em;
+    cursor:pointer;
+    user-select:none;
+    transition:transform 0.15s;
+  }
+  .memory-tile.flipped{
+    background:white;
+    border:3px solid var(--teal);
+  }
+  .memory-tile.matched{
+    background:#d4f5e1;
+    border:3px solid var(--green);
+    cursor:default;
+  }
+  .game-status{
+    font-weight:bold;
+    color:var(--navy);
+    margin-bottom:14px;
+    min-height:24px;
+  }
+  .closeGameBtn{
+    background:var(--teal);
+    color:white;
+  }
+  .closeGameBtn:hover{ background:#239e92; }
+  .simon-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:280px;
+  }
+  .simon-tile{
+    aspect-ratio:1/1;
+    border-radius:16px;
+    cursor:pointer;
+    opacity:0.55;
+    transition:opacity 0.15s, transform 0.1s;
+  }
+  .simon-tile.lit{
+    opacity:1;
+    transform:scale(0.96);
+  }
+  .simon-tile.red{ background:#d62828; }
+  .simon-tile.green{ background:#2a9d8f; }
+  .simon-tile.teal{ background:#1d3557; }
+  .simon-tile.gold{ background:#e9c46a; }
+  .seq-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:400px;
+  }
+  .seq-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.6em;
+    font-weight:bold;
+    cursor:pointer;
+    user-select:none;
+  }
+  .seq-tile.used{
+    background:#d4f5e1;
+    color:var(--green);
+    cursor:default;
+  }
+  .seq-tile.wrong{
+    background:var(--red);
+  }
+  .choice-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:12px;
+    max-width:440px;
+    margin:14px auto 0;
+  }
+  .choice-btn{
+    background:white;
+    border:3px solid var(--teal);
+    border-radius:14px;
+    padding:14px 12px;
+    cursor:pointer;
+    font-size:1.25em;
+    font-weight:bold;
+    line-height:1.3;
+    word-break:break-word;
+    transition:transform 0.1s, border-color 0.15s;
+  }
+  .choice-btn:hover{
+    transform:translateY(-2px);
+    border-color:var(--navy);
+  }
+  .choice-btn.picked-correct{
+    border-color:var(--green);
+    background:#d4f5e1;
+  }
+  .choice-btn.picked-wrong{
+    border-color:var(--red);
+    background:#fbe1e1;
+  }
+  .choice-btn:disabled{
+    cursor:default;
+  }
+</style>
+</head>
+<body>
+
+<a href="bentley_hub.html" style="display:inline-block;color:#f4a8a8;font-weight:bold;text-decoration:none;margin-bottom:10px;">&larr; Back to profile</a>
+<div class="header">
+  <h1>🔥 Bentley's Math Mission</h1>
+  <p>Multiplication • Division • Exponents • Order of Operations • Add/Subtract • Fractions • Decimals</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="scoreNum">0</div><div class="label">Correct</div></div>
+  <div class="stat"><div class="num" id="attemptNum">0</div><div class="label">Attempted</div></div>
+  <div class="stat"><div class="num" id="streakNum">0</div><div class="label">Streak 🔥</div></div>
+  <div class="stat"><div class="num" id="bestNum">0</div><div class="label">Best Streak</div></div>
+</div>
+
+<div class="card">
+  <div class="tag" id="tag">TOPIC</div>
+  <div class="qtext" id="qtext">Loading...</div>
+  <input type="number" id="answer" autocomplete="off">
+  <div class="choice-grid" id="choiceGrid" style="display:none;"></div>
+  <div class="actions">
+    <button id="checkBtn" onclick="checkAnswer()">Check</button>
+    <button id="skipBtn" onclick="skipProblem()">Skip</button>
+    <button id="nextBtn" onclick="nextProblem()">Next Problem →</button>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explainBox"></div>
+</div>
+
+<div class="topics">New problems generate forever — keep going as long as you like!</div>
+
+<div class="overlay" id="rewardOverlay">
+  <div class="game-card">
+    <h2 id="gameTitle">🎉 12 in a Row!</h2>
+    <div class="sub" id="gameSub">You unlocked a game!</div>
+    <div class="game-status" id="gameStatus">Find all the matching pairs!</div>
+    <div id="gameContent"></div>
+    <button class="closeGameBtn" id="backToMathBtn" onclick="closeRewardGame()">Back to Math →</button>
+  </div>
+</div>
+
+<script>
+let score = 0, attempts = 0, streak = 0, best = 0;
+let current = null;
+
+function randInt(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---- Problem generators ----
+// ===== Visual helpers =====
+function placeName(idx){
+  const names = ['ones','tens','hundreds','thousands'];
+  return names[idx] || `10^${idx} place`;
+}
+function toSuperscript(n){
+  const map = {2:'²',3:'³',4:'⁴',5:'⁵',6:'⁶'};
+  return map[n] || ('^'+n);
+}
+function digitCell(main, supText, strike){
+  return `<span class="vcell">${supText ? `<span class="sup">${supText}</span>` : ''}<span class="${strike?'strike':''}">${main}</span></span>`;
+}
+function blankCell(){ return `<span class="vcell"></span>`; }
+function opCell(sym){ return `<span class="vop">${sym}</span>`; }
+
+// ===== Visual: Addition (carrying) =====
+function buildAddVisual(a, b){
+  const len = Math.max(String(a).length, String(b).length) ;
+  const totalLen = len + 1;
+  const da = String(a).padStart(totalLen,' ');
+  const db = String(b).padStart(totalLen,' ');
+  let carry = 0;
+  const carryRow = new Array(totalLen).fill('');
+  const resultRow = new Array(totalLen).fill('');
+  for(let i=totalLen-1;i>=0;i--){
+    const x = da[i] === ' ' ? 0 : Number(da[i]);
+    const y = db[i] === ' ' ? 0 : Number(db[i]);
+    const total = x + y + carry;
+    if(total >= 10){
+      resultRow[i] = total - 10;
+      carry = 1;
+      if(i > 0) carryRow[i-1] = '1';
+    } else {
+      resultRow[i] = total;
+      carry = 0;
+    }
+  }
+  let topHtml = '<div class="vrow">' + opCell('') + Array.from({length:totalLen},(_,i)=>{
+    const ch = da[i];
+    return digitCell(ch === ' ' ? '' : ch, carryRow[i] || '');
+  }).join('') + '</div>';
+  let botHtml = '<div class="vrow">' + opCell('+') + Array.from({length:totalLen},(_,i)=> digitCell(db[i]===' '?'':db[i])).join('') + '</div>';
+  let resHtml = '<div class="vrow">' + opCell('') + resultRow.map(d=>digitCell(d===''?'':d)).join('') + '</div>';
+  const finalNum = resultRow.join('').replace(/^0+(?=\d)/,'').trim();
+  return `<div class="vlabel">Step-by-step (right to left, carrying when a column adds to 10 or more):</div>
+    <div class="vmath">${topHtml}${botHtml}<div class="vline"></div>${resHtml}</div>
+    <div class="vlabel">Final answer: ${finalNum}</div>`;
+}
+
+// ===== Visual: Subtraction (borrowing) =====
+function buildSubVisual(big, small){
+  const len = String(big).length;
+  const dTop = String(big).padStart(len,'0').split('').map(Number);
+  const dBot = String(small).padStart(len,'0').split('').map(Number);
+  let borrow = 0;
+  const topDisplay = dTop.map(d=>({orig:d, reduced:null}));
+  const resultRow = new Array(len).fill('');
+  const ones12Row = new Array(len).fill('');
+  for(let i=len-1;i>=0;i--){
+    let top = dTop[i] - borrow;
+    if(borrow) topDisplay[i].reduced = top;
+    const bot = dBot[i];
+    if(top < bot){
+      ones12Row[i] = top + 10;
+      resultRow[i] = (top+10) - bot;
+      borrow = 1;
+    } else {
+      resultRow[i] = top - bot;
+      borrow = 0;
+    }
+  }
+  let topHtml = '<div class="vrow">' + opCell('') + dTop.map((d,i)=>{
+    if(ones12Row[i] !== ''){
+      return digitCell(d, String(ones12Row[i]), true);
+    } else if(topDisplay[i].reduced !== null){
+      return digitCell(d, String(topDisplay[i].reduced), true);
+    } else {
+      return digitCell(d);
+    }
+  }).join('') + '</div>';
+  let botHtml = '<div class="vrow">' + opCell('−') + dBot.map(d=>digitCell(d)).join('') + '</div>';
+  let resHtml = '<div class="vrow">' + opCell('') + resultRow.map(d=>digitCell(d)).join('') + '</div>';
+  const finalNum = resultRow.join('').replace(/^0+(?=\d)/,'') || '0';
+  return `<div class="vlabel">Step-by-step (right to left — crossed-out digits show what was borrowed from):</div>
+    <div class="vmath">${topHtml}${botHtml}<div class="vline"></div>${resHtml}</div>
+    <div class="vlabel">Final answer: ${finalNum}</div>`;
+}
+
+function genAddSub(){
+  const isAdd = Math.random() < 0.5;
+  const a = randInt(20, 200);
+  const b = randInt(10, 150);
+  if(isAdd){
+    return { tag:'ADDITION', text:`${a} + ${b} =`, ans:a+b, explain: buildAddVisual(a, b) };
+  } else {
+    const big = Math.max(a,b), small = Math.min(a,b);
+    return { tag:'SUBTRACTION', text:`${big} − ${small} =`, ans:big-small, explain: buildSubVisual(big, small) };
+  }
+}
+
+// ===== Visual: Multiplication (long multiplication grid) =====
+function buildMultVisual(a, b){
+  // a x b, b can be multi-digit. Build partial products per digit of b (right to left), then sum.
+  const bDigits = String(b).split('').map(Number).reverse(); // ones first
+  const partials = [];
+  bDigits.forEach((bd, idx)=>{
+    partials.push({ value: a * bd * Math.pow(10, idx), label: `${a} × ${bd}${idx>0 ? ' (and shift left '+idx+' place'+(idx>1?'s':'')+' for the '+placeName(idx)+')' : ''} = ${a*bd}${idx>0 ? '0'.repeat(idx) : ''}` });
+  });
+  let stepsHtml = partials.map(p=> `<div class="vstep">${p.label}</div>`).join('');
+  let sumHtml = '';
+  if(partials.length > 1){
+    // visually add the partials
+    let runningSum = partials[0].value;
+    let sumLines = `<div class="vrow">${opCell('')}${String(partials[0].value).split('').map(d=>digitCell(d)).join('')}</div>`;
+    for(let i=1;i<partials.length;i++){
+      runningSum += partials[i].value;
+      sumLines += `<div class="vrow">${opCell('+')}${String(partials[i].value).split('').map(d=>digitCell(d)).join('')}</div>`;
+    }
+    sumLines += `<div class="vline"></div><div class="vrow">${opCell('')}${String(runningSum).split('').map(d=>digitCell(d)).join('')}</div>`;
+    sumHtml = `<div class="vlabel">Add the partial products:</div><div class="vmath">${sumLines}</div>`;
+  }
+  const finalAns = a * b;
+  return `<div class="vlabel">Break ${b} into its digits and multiply ${a} by each one:</div>
+    ${stepsHtml}
+    ${sumHtml}
+    <div class="vlabel">Final answer: ${finalAns}</div>`;
+}
+
+function genMultiplicationSimple(){
+  const a = randInt(3, 15);
+  const b = randInt(3, 12);
+  return { tag:'MULTIPLICATION', text:`${a} × ${b} =`, ans:a*b, explain: buildMultVisual(a,b) };
+}
+
+// ===== Visual: Division (bus-stop / short division) =====
+function buildDivisionVisual(dividend, divisor, quotient){
+  const digits = String(dividend).split('').map(Number);
+  let remainder = 0;
+  let steps = [];
+  let quotientDigits = [];
+  digits.forEach((d, i)=>{
+    const bring = remainder * 10 + d;
+    const q = Math.floor(bring / divisor);
+    remainder = bring % divisor;
+    quotientDigits.push(q);
+    steps.push(`Bring down ${d}${i>0 && remainder !== bring ? ` (with remainder ${bring-d===0?'':''})`:''}: ${i===0 ? d : 'remainder '+ (bring-q*divisor+q*divisor-d>=0?'':'')+ '... '+bring} ÷ ${divisor} → ${divisor} × ${q} = ${divisor*q}, remainder ${remainder}.`);
+  });
+  // Simplify: rebuild cleaner steps using straightforward narrative tied to bus-stop
+  let cleanSteps = [];
+  let rem = 0;
+  let qDigitsClean = [];
+  digits.forEach((d)=>{
+    const bring = rem * 10 + d;
+    const q = Math.floor(bring / divisor);
+    rem = bring - q * divisor;
+    qDigitsClean.push(q);
+    cleanSteps.push(`<div class="vstep">Bring down ${bring === d ? d : `the digits to make ${bring}`}: ${bring} ÷ ${divisor} = ${q}, because ${divisor} × ${q} = ${divisor*q}. ${bring} − ${divisor*q} = ${rem} remainder.</div>`);
+  });
+  const quotientStr = qDigitsClean.join('').replace(/^0+(?=\d)/,'');
+  const busStop = `<div class="division-box">
+      <span class="division-divisor">${divisor}</span>
+      <span class="division-top">${dividend} <br><b>${quotientStr}</b></span>
+    </div>`;
+  return `<div class="vlabel">Short division — work left to right, one digit at a time:</div>
+    ${busStop}
+    ${cleanSteps.join('')}
+    <div class="vlabel">Final answer: ${quotientStr}</div>`;
+}
+
+function genDivision(){
+  const b = randInt(2, 12);
+  const ans = randInt(2, 12);
+  const a = b * ans;
+  return { tag:'DIVISION', text:`${a} ÷ ${b} =`, ans:ans, explain: buildDivisionVisual(a, b, ans) };
+}
+
+// ===== Visual: Exponents (multiplication ladder) =====
+function buildExponentVisual(base, exp){
+  let running = 1;
+  let rows = [];
+  for(let i=0;i<exp;i++){
+    const prev = running;
+    running *= base;
+    rows.push(`<div class="vstep">${prev===1 ? base : prev} ${prev===1?'':'× '+base+' '} = <b>${running}</b></div>`);
+  }
+  // Build clean ladder: step 1 shows base, then each multiplication
+  let ladder = [];
+  let r = base;
+  ladder.push(`<div class="vstep">Start: ${base}</div>`);
+  for(let i=1;i<exp;i++){
+    const next = r*base;
+    ladder.push(`<div class="vstep">Step ${i}: ${r} × ${base} = <b>${next}</b></div>`);
+    r = next;
+  }
+  return `<div class="vlabel">${base}${toSuperscript(exp)} means multiply ${base} by itself ${exp} times:</div>
+    ${ladder.join('')}
+    <div class="vlabel">Final answer: ${r}</div>`;
+}
+
+function genExponent(){
+  const base = randInt(2, 6);
+  const exp = randInt(2, 4);
+  const ans = Math.pow(base, exp);
+  return { tag:'EXPONENTS', text:`${base}${toSuperscript(exp)} =`, ans, explain: buildExponentVisual(base, exp) };
+}
+
+// ===== Order of operations (numbered step list) =====
+function genOrderOfOps(){
+  const type = randInt(1,4);
+  const a = randInt(2,9), b = randInt(2,9), c = randInt(2,9);
+  if(type === 1){
+    const ans = a + b*c;
+    return { tag:'ORDER OF OPERATIONS', text:`${a} + ${b} × ${c} =`, ans,
+      explain:`<div class="vlabel">PEMDAS — Multiply before you add:</div>
+        <div class="vstep">Step 1: ${b} × ${c} = <b>${b*c}</b></div>
+        <div class="vstep">Step 2: ${a} + ${b*c} = <b>${ans}</b></div>
+        <div class="vlabel">Final answer: ${ans}</div>` };
+  } else if(type === 2){
+    const ans = (a+b)*c;
+    return { tag:'ORDER OF OPERATIONS', text:`(${a} + ${b}) × ${c} =`, ans,
+      explain:`<div class="vlabel">PEMDAS — Parentheses come first:</div>
+        <div class="vstep">Step 1: ${a} + ${b} = <b>${a+b}</b></div>
+        <div class="vstep">Step 2: ${a+b} × ${c} = <b>${ans}</b></div>
+        <div class="vlabel">Final answer: ${ans}</div>` };
+  } else if(type === 3){
+    const base = randInt(2,5);
+    const sq = base*base;
+    const ans = sq + b*c;
+    return { tag:'ORDER OF OPERATIONS', text:`${base}² + ${b} × ${c} =`, ans,
+      explain:`<div class="vlabel">PEMDAS — Exponents, then multiplication, then addition:</div>
+        <div class="vstep">Step 1: ${base}² = ${base} × ${base} = <b>${sq}</b></div>
+        <div class="vstep">Step 2: ${b} × ${c} = <b>${b*c}</b></div>
+        <div class="vstep">Step 3: ${sq} + ${b*c} = <b>${ans}</b></div>
+        <div class="vlabel">Final answer: ${ans}</div>` };
+  } else {
+    const ans = a*b - c;
+    return { tag:'ORDER OF OPERATIONS', text:`${a} × ${b} − ${c} =`, ans,
+      explain:`<div class="vlabel">PEMDAS — Multiply before you subtract:</div>
+        <div class="vstep">Step 1: ${a} × ${b} = <b>${a*b}</b></div>
+        <div class="vstep">Step 2: ${a*b} − ${c} = <b>${ans}</b></div>
+        <div class="vlabel">Final answer: ${ans}</div>` };
+  }
+}
+
+// ===== Visual: Fractions =====
+function fractionVisual(num, den, strikeNum, newNum, strikeDen, newDen){
+  return `<span class="fraction-visual">
+      <span class="fnum">${strikeNum!==undefined ? `<span class="strike">${num}</span> <span class="new-val">${newNum}</span>` : num}</span>
+      <span class="fden">${strikeDen!==undefined ? `<span class="strike">${den}</span> <span class="new-val">${newDen}</span>` : den}</span>
+    </span>`;
+}
+
+function genFraction(){
+  const type = randInt(1,3);
+  if(type === 1){
+    const g = randInt(2,6);
+    let den = g * randInt(2,6);
+    let num = g * randInt(1, Math.floor(den/g) - 1 || 1);
+    if(num <= 0) num = g;
+    if(num >= den) num = Math.max(1, den - g);
+    const gcd = gcdCalc(num, den);
+    const simpNum = num / gcd, simpDen = den / gcd;
+    return {
+      tag:'FRACTIONS', text:`Simplify ${num}/${den} — enter just the new numerator (e.g. 2/4 → 1/2, type 1) =`,
+      ans: simpNum,
+      explain:`<div class="vlabel">Find the greatest common factor (GCF) of ${num} and ${den}: it's ${gcd}.</div>
+        <div class="vlabel">Divide top and bottom by ${gcd}:</div>
+        ${fractionVisual(num, den, true, simpNum, true, simpDen)}
+        <div class="vstep" style="margin-top:8px;">${num} ÷ ${gcd} = ${simpNum} &nbsp;&nbsp; ${den} ÷ ${gcd} = ${simpDen}</div>
+        <div class="vlabel">Final answer: ${simpNum}/${simpDen}</div>`
+    };
+  } else if(type === 2){
+    const den = randInt(4,10);
+    let a = randInt(1, den-2);
+    let b = randInt(1, Math.max(1, den-a-1));
+    const ansNum = a+b;
+    return {
+      tag:'FRACTIONS', text:`${a}/${den} + ${b}/${den} = ?/${den} — enter just the numerator =`,
+      ans: ansNum,
+      explain:`<div class="vlabel">Same denominator, so just add the numerators:</div>
+        <div class="vstep">${a} + ${b} = <b>${ansNum}</b></div>
+        <div class="vlabel">The denominator (${den}) stays the same.</div>
+        <div class="vlabel">Final answer: ${ansNum}/${den}</div>`
+    };
+  } else {
+    const den = randInt(2,6);
+    const num = randInt(1, den-1);
+    const whole = den * randInt(2,8);
+    const step1 = whole/den;
+    const ans = step1*num;
+    return {
+      tag:'FRACTIONS', text:`${num}/${den} of ${whole} =`,
+      ans: ans,
+      explain:`<div class="vlabel">"Of" means multiply. First divide, then multiply by the numerator:</div>
+        <div class="vstep">Step 1: ${whole} ÷ ${den} = <b>${step1}</b></div>
+        <div class="vstep">Step 2: ${step1} × ${num} = <b>${ans}</b></div>
+        <div class="vlabel">Final answer: ${ans}</div>`
+    };
+  }
+}
+
+function gcdCalc(a,b){
+  while(b){ [a,b] = [b, a % b]; }
+  return a;
+}
+
+// ===== Decimals: where does the point go? =====
+function genDecimalWords(){
+  const whole = randInt(2, 89);
+  const tenths = randInt(1, 9);
+  const correct = `${whole}.${tenths}`;
+  const choiceSet = new Set([
+    correct,
+    `${tenths}.${whole}`,
+    `${whole}${tenths}.0`,
+    `0.${whole}${tenths}`
+  ]);
+  const choices = shuffle([...choiceSet]).map(c => ({ value: c, label: c }));
+  return {
+    tag:'DECIMALS', type:'choice',
+    text:`Which decimal shows "${whole} and ${tenths} tenths"?`,
+    choices, ans: correct,
+    explain:`<div class="vlabel">"${whole} and ${tenths} tenths" means ${whole} + ${tenths}/10.</div>
+      <div class="vstep">The whole number stays in front, and one digit goes after the decimal point for tenths:</div>
+      <div class="vstep">Final answer: <b>${correct}</b></div>`
+  };
+}
+
+function genDecimalMoney(){
+  const dollars = randInt(1, 40);
+  const cents = randInt(1, 99);
+  const totalCents = dollars * 100 + cents;
+  const centsStr = String(cents).padStart(2, '0');
+  const correct = `$${dollars}.${centsStr}`;
+  const choiceSet = new Set([
+    correct,
+    `$${dollars}${cents}.00`,
+    `$0.${dollars}${cents}`,
+    `$${dollars}.${cents}`
+  ]);
+  const choices = shuffle([...choiceSet]).slice(0, 4).map(c => ({ value: c, label: c }));
+  if (!choices.some(c => c.value === correct)) choices[randInt(0,3)] = { value: correct, label: correct };
+  return {
+    tag:'DECIMALS', type:'choice',
+    text:`${totalCents} cents is the same as how many dollars?`,
+    choices, ans: correct,
+    explain:`<div class="vlabel">100 cents = $1, so divide by 100 — that moves the decimal point two places from the right:</div>
+      <div class="vstep">${totalCents} cents → <b>${correct}</b></div>`
+  };
+}
+
+function genDecimalMagnitude(){
+  const target = randInt(2, 9);
+  const tenths = randInt(1, 9);
+  const correct = `${target}.${tenths}`;
+  const choiceSet = new Set([
+    correct,
+    `${target}${tenths}`,
+    `0.${target}${tenths}`,
+    `${target}${tenths}0`
+  ]);
+  const choices = shuffle([...choiceSet]).slice(0, 4).map(c => ({ value: c, label: c }));
+  return {
+    tag:'DECIMALS', type:'choice',
+    text:`Which of these numbers is closest to ${target}?`,
+    choices, ans: correct,
+    explain:`<div class="vlabel">Check each option against ${target}:</div>
+      <div class="vstep">${correct} is just a little more than ${target} — the decimal point keeps it close in size.</div>
+      <div class="vstep">The other options move the point too far left or right, making the number much bigger or smaller.</div>
+      <div class="vlabel">Final answer: <b>${correct}</b></div>`
+  };
+}
+
+function genDecimalDigits(){
+  const tens = randInt(2, 9);
+  const ones = randInt(0, 9);
+  const tenths = randInt(1, 9);
+  const digits = `${tens}${ones}${tenths}`;
+  const targetWhole = tens * 10 + ones;
+  const correct = `${tens}${ones}.${tenths}`;
+  const choiceSet = new Set([
+    correct,
+    `${tens}.${ones}${tenths}`,
+    `${digits}.0`,
+    `0.${digits}`
+  ]);
+  const choices = shuffle([...choiceSet]).slice(0, 4).map(c => ({ value: c, label: c }));
+  return {
+    tag:'DECIMALS', type:'choice',
+    text:`Use the digits ${tens}, ${ones}, ${tenths} to make a number close to ${targetWhole}. Where does the decimal point go?`,
+    choices, ans: correct,
+    explain:`<div class="vlabel">We want a number near ${targetWhole}, so the whole-number part should be ${targetWhole}:</div>
+      <div class="vstep">${digits} → <b>${correct}</b></div>
+      <div class="vlabel">Putting the point anywhere else makes the number much bigger or much smaller than ${targetWhole}.</div>`
+  };
+}
+
+const generators = [genMultiplicationSimple, genDivision, genExponent, genOrderOfOps, genAddSub, genFraction, genDecimalWords, genDecimalMoney, genDecimalMagnitude, genDecimalDigits];
+
+function skipProblem(){
+  nextProblem();
+}
+
+function nextProblem(){
+  const gen = generators[randInt(0, generators.length - 1)];
+  current = gen();
+  document.getElementById('tag').textContent = current.tag;
+  document.getElementById('qtext').textContent = current.text;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('explainBox').classList.remove('show');
+  document.getElementById('nextBtn').style.display = 'none';
+
+  const answerInput = document.getElementById('answer');
+  const choiceGrid = document.getElementById('choiceGrid');
+
+  if (current.type === 'choice') {
+    document.getElementById('checkBtn').style.display = 'none';
+    answerInput.style.display = 'none';
+    choiceGrid.style.display = 'grid';
+    choiceGrid.innerHTML = '';
+    current.choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = choice.label;
+      btn.onclick = () => selectChoice(choice.value, btn);
+      choiceGrid.appendChild(btn);
+    });
+  } else {
+    document.getElementById('checkBtn').style.display = 'inline-block';
+    answerInput.style.display = 'inline-block';
+    choiceGrid.style.display = 'none';
+    answerInput.value = '';
+    answerInput.disabled = false;
+    answerInput.focus();
+  }
+}
+
+function selectChoice(val, clickedBtn){
+  attempts++;
+  const fb = document.getElementById('feedback');
+  const ex = document.getElementById('explainBox');
+  const allBtns = document.querySelectorAll('.choice-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  if (val === current.ans) {
+    score++; streak++;
+    if (streak > best) best = streak;
+    clickedBtn.classList.add('picked-correct');
+    fb.textContent = '✅ Correct!';
+    fb.className = 'feedback correct';
+    ex.classList.remove('show');
+  } else {
+    streak = 0;
+    clickedBtn.classList.add('picked-wrong');
+    current.choices.forEach((choice, i) => {
+      if (choice.value === current.ans) allBtns[i].classList.add('picked-correct');
+    });
+    fb.textContent = '❌ Not quite';
+    fb.className = 'feedback incorrect';
+    ex.innerHTML = current.explain;
+    ex.classList.add('show');
+  }
+  updateStats();
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function checkAnswer(){
+  const input = document.getElementById('answer');
+  const fb = document.getElementById('feedback');
+  const ex = document.getElementById('explainBox');
+  if(input.value === ''){
+    fb.textContent = 'Type an answer first!';
+    fb.className = 'feedback incorrect';
+    return;
+  }
+  attempts++;
+  const val = Number(input.value);
+  if(val === current.ans){
+    score++; streak++;
+    if(streak > best) best = streak;
+    fb.textContent = '✅ Correct!';
+    fb.className = 'feedback correct';
+    ex.classList.remove('show');
+  } else {
+    streak = 0;
+    fb.textContent = '❌ Not quite';
+    fb.className = 'feedback incorrect';
+    ex.innerHTML = current.explain;
+    ex.classList.add('show');
+  }
+  updateStats();
+  document.getElementById('checkBtn').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'inline-block';
+  input.disabled = true;
+}
+
+function updateStats(){
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('attemptNum').textContent = attempts;
+  document.getElementById('streakNum').textContent = streak;
+  document.getElementById('bestNum').textContent = best;
+  if(streak > 0 && streak % 12 === 0){
+    openRewardGame();
+  }
+}
+
+// ---- Reward Games (rotates through 3 different mini-games) ----
+let rewardCount = 0;
+const EMOJIS = ['🚀','⭐','🐉','🍕','🎲','🦄','🌈','🎮'];
+let memState = { first:null, lock:false, matchedCount:0 };
+let seqState = { next:1 };
+let simonState = { sequence:[], playerStep:0, playing:false };
+
+function openRewardGame(){
+  const overlay = document.getElementById('rewardOverlay');
+  overlay.classList.add('show');
+  const gameType = rewardCount % 3;
+  rewardCount++;
+  if(gameType === 0) setupMemoryGame();
+  else if(gameType === 1) setupSequenceGame();
+  else setupSimonGame();
+}
+
+function closeRewardGame(){
+  document.getElementById('rewardOverlay').classList.remove('show');
+  simonState.playing = false;
+}
+
+// Game 1: Memory Match
+function setupMemoryGame(){
+  document.getElementById('gameTitle').textContent = '🎉 12 in a Row!';
+  document.getElementById('gameSub').textContent = 'You unlocked Memory Match!';
+  document.getElementById('gameStatus').textContent = 'Find all the matching pairs!';
+  const chosen = [...EMOJIS].sort(()=>Math.random()-0.5).slice(0,6);
+  let deck = [...chosen, ...chosen].sort(()=>Math.random()-0.5);
+  memState = { first:null, lock:false, matchedCount:0 };
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="memory-grid" id="memoryGrid"></div>';
+  const grid = document.getElementById('memoryGrid');
+  deck.forEach((emoji, idx)=>{
+    const tile = document.createElement('div');
+    tile.className = 'memory-tile';
+    tile.dataset.idx = idx;
+    tile.dataset.emoji = emoji;
+    tile.textContent = '❓';
+    tile.onclick = ()=>flipTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function flipTile(tile){
+  if(memState.lock) return;
+  if(tile.classList.contains('flipped') || tile.classList.contains('matched')) return;
+  tile.classList.add('flipped');
+  tile.textContent = tile.dataset.emoji;
+  if(memState.first === null){
+    memState.first = tile;
+  } else {
+    const first = memState.first, second = tile;
+    if(first.dataset.emoji === second.dataset.emoji){
+      first.classList.add('matched');
+      second.classList.add('matched');
+      memState.first = null;
+      memState.matchedCount++;
+      if(memState.matchedCount === 6){
+        document.getElementById('gameStatus').textContent = '🏆 You matched them all! Great job!';
+      }
+    } else {
+      memState.lock = true;
+      setTimeout(()=>{
+        first.classList.remove('flipped'); first.textContent = '❓';
+        second.classList.remove('flipped'); second.textContent = '❓';
+        memState.first = null; memState.lock = false;
+      }, 700);
+    }
+  }
+}
+
+// Game 2: Number Sequence (click 1-12 in order, shuffled positions)
+function setupSequenceGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Another Streak!';
+  document.getElementById('gameSub').textContent = 'You unlocked Number Rush!';
+  document.getElementById('gameStatus').textContent = 'Click the numbers 1 → 12 in order, as fast as you can!';
+  seqState = { next:1 };
+  const nums = Array.from({length:12}, (_,i)=>i+1).sort(()=>Math.random()-0.5);
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="seq-grid" id="seqGrid"></div>';
+  const grid = document.getElementById('seqGrid');
+  nums.forEach(n=>{
+    const tile = document.createElement('div');
+    tile.className = 'seq-tile';
+    tile.textContent = n;
+    tile.dataset.num = n;
+    tile.onclick = ()=>clickSeqTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function clickSeqTile(tile){
+  const num = Number(tile.dataset.num);
+  if(tile.classList.contains('used')) return;
+  if(num === seqState.next){
+    tile.classList.add('used');
+    seqState.next++;
+    if(seqState.next === 13){
+      document.getElementById('gameStatus').textContent = '🏆 Awesome! You got them all in order!';
+    }
+  } else {
+    tile.classList.add('wrong');
+    setTimeout(()=>tile.classList.remove('wrong'), 300);
+  }
+}
+
+// Game 3: Simon-style color memory
+function setupSimonGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Streak Power!';
+  document.getElementById('gameSub').textContent = 'You unlocked Color Memory!';
+  document.getElementById('gameStatus').textContent = 'Watch the pattern, then repeat it!';
+  simonState = { sequence:[], playerStep:0, playing:false };
+  const colors = ['red','green','teal','gold'];
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="simon-grid" id="simonGrid"></div>';
+  const grid = document.getElementById('simonGrid');
+  colors.forEach(c=>{
+    const tile = document.createElement('div');
+    tile.className = 'simon-tile ' + c;
+    tile.dataset.color = c;
+    tile.onclick = ()=>simonClick(tile);
+    grid.appendChild(tile);
+  });
+  simonState.sequence = [colors[randInt(0,3)]];
+  setTimeout(()=>playSimonSequence(), 600);
+}
+
+function playSimonSequence(){
+  simonState.playing = true;
+  simonState.playerStep = 0;
+  document.getElementById('gameStatus').textContent = 'Watch closely...';
+  const grid = document.getElementById('simonGrid');
+  let i = 0;
+  const interval = setInterval(()=>{
+    if(i > 0){
+      const prevTile = grid.querySelector(`[data-color="${simonState.sequence[i-1]}"]`);
+      if(prevTile) prevTile.classList.remove('lit');
+    }
+    if(i >= simonState.sequence.length){
+      clearInterval(interval);
+      simonState.playing = false;
+      document.getElementById('gameStatus').textContent = `Your turn! Repeat the pattern (${simonState.sequence.length} step${simonState.sequence.length>1?'s':''}).`;
+      return;
+    }
+    const tile = grid.querySelector(`[data-color="${simonState.sequence[i]}"]`);
+    if(tile) tile.classList.add('lit');
+    i++;
+  }, 700);
+}
+
+function simonClick(tile){
+  if(simonState.playing) return;
+  const color = tile.dataset.color;
+  tile.classList.add('lit');
+  setTimeout(()=>tile.classList.remove('lit'), 250);
+  if(color === simonState.sequence[simonState.playerStep]){
+    simonState.playerStep++;
+    if(simonState.playerStep === simonState.sequence.length){
+      if(simonState.sequence.length >= 6){
+        document.getElementById('gameStatus').textContent = '🏆 Amazing memory! You completed it!';
+        return;
+      }
+      const colors = ['red','green','teal','gold'];
+      simonState.sequence.push(colors[randInt(0,3)]);
+      document.getElementById('gameStatus').textContent = 'Nice! Get ready for the next round...';
+      setTimeout(()=>playSimonSequence(), 900);
+    }
+  } else {
+    document.getElementById('gameStatus').textContent = '❌ Oops, that broke the pattern. Try again!';
+    simonState.sequence = [simonState.sequence[0]];
+    setTimeout(()=>playSimonSequence(), 1000);
+  }
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  if(document.getElementById('rewardOverlay').classList.contains('show')){
+    closeRewardGame();
+    return;
+  }
+  if(document.getElementById('checkBtn').style.display !== 'none'){
+    checkAnswer();
+  } else if(document.getElementById('nextBtn').style.display !== 'none'){
+    nextProblem();
+  }
+});
+
+nextProblem();
+</script>
+
+</body>
+</html>

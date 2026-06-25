@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bradley's Phonics Practice</title>
+<style>
+  :root{
+    --navy:#1a1a1a;
+    --gold:#e63946;
+    --teal:#4a4a4a;
+    --cream:#f5f1ee;
+    --red:#d62828;
+    --green:#3aa655;
+    --purple:#2b2b2b;
+    --blue:#2b6cb0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+    background:linear-gradient(160deg, #1a0000 0%, #4a0404 35%, #7a0c0c 65%, #1a0000 100%);
+    color:var(--navy);
+    padding:24px;
+    min-height:100vh;
+  }
+  a.backlink{
+    display:inline-block;
+    color:#f4a8a8;
+    font-weight:bold;
+    text-decoration:none;
+    margin-bottom:10px;
+  }
+  .header{ text-align:center; margin-bottom:20px; }
+  .header h1{
+    font-size:2.1em;
+    margin:0;
+    color:#ffffff;
+    text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .header p{ color:#f4a8a8; font-weight:bold; margin:6px 0 0; }
+  .stats{ display:flex; justify-content:center; gap:24px; margin-bottom:24px; flex-wrap:wrap; }
+  .stat{ background:white; border:3px solid var(--navy); border-radius:12px; padding:10px 18px; text-align:center; min-width:110px; }
+  .stat .num{ font-size:1.6em; font-weight:bold; color:var(--navy); }
+  .stat .label{ font-size:0.85em; color:var(--teal); font-weight:bold; }
+  .card{
+    max-width:560px;
+    margin:0 auto;
+    background:white;
+    border:4px solid var(--navy);
+    border-radius:20px;
+    padding:28px 26px;
+    text-align:center;
+  }
+  .tag{
+    display:inline-block;
+    background:var(--purple);
+    color:white;
+    font-size:0.8em;
+    font-weight:bold;
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:14px;
+  }
+  .qtext{ font-size:1.6em; font-weight:bold; margin:10px 0 22px; line-height:1.4; }
+  .qword{
+    font-family:'Courier New', monospace;
+    font-size:2.4em;
+    font-weight:bold;
+    color:var(--blue);
+    letter-spacing:2px;
+    margin-bottom:8px;
+  }
+  .qhint{ font-size:1em; color:var(--teal); font-weight:bold; margin-bottom:18px; }
+  .choice-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:12px;
+    max-width:380px;
+    margin:0 auto 8px;
+  }
+  .choice-btn{
+    background:white;
+    border:3px solid var(--teal);
+    border-radius:14px;
+    padding:16px 10px;
+    cursor:pointer;
+    font-size:1.5em;
+    font-weight:bold;
+    font-family:'Courier New', monospace;
+    transition:transform 0.1s, border-color 0.15s;
+  }
+  .choice-btn:hover{ transform:translateY(-2px); border-color:var(--blue); }
+  .choice-btn.picked-correct{ border-color:var(--green); background:#d4f5e1; }
+  .choice-btn.picked-wrong{ border-color:var(--red); background:#fbe1e1; }
+  .choice-btn:disabled{ cursor:default; }
+  .actions{ margin-top:18px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+  button{ border:none; border-radius:10px; padding:12px 22px; font-size:1.05em; font-weight:bold; cursor:pointer; }
+  #skipBtn{ background:white; border:2px solid var(--teal); color:var(--teal); }
+  #nextBtn{ background:var(--gold); color:white; display:none; }
+  #nextBtn:hover{ background:#c0202d; }
+  .feedback{ margin-top:14px; font-size:1.3em; font-weight:bold; min-height:32px; }
+  .correct{ color:var(--green); }
+  .incorrect{ color:var(--red); }
+  .explain{
+    margin-top:14px;
+    background:#fff4e0;
+    border-left:5px solid var(--gold);
+    border-radius:8px;
+    padding:12px 16px;
+    text-align:left;
+    font-size:1.05em;
+    display:none;
+  }
+  .explain.show{ display:block; }
+  .topics{ text-align:center; margin-top:24px; font-size:0.9em; color:#e3b8b8; }
+  .overlay{
+    display:none;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(27,42,74,0.85);
+    z-index:999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .overlay.show{ display:flex; }
+  .game-card{
+    background:var(--cream);
+    border:5px solid var(--gold);
+    border-radius:20px;
+    padding:24px;
+    max-width:480px;
+    width:100%;
+    text-align:center;
+  }
+  .game-card h2{ margin:0 0 6px; color:var(--navy); }
+  .game-card .sub{ color:var(--purple); font-weight:bold; margin-bottom:16px; }
+  .memory-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin:0 auto 18px; max-width:400px; }
+  .memory-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.8em;
+    cursor:pointer;
+    user-select:none;
+    transition:transform 0.15s;
+  }
+  .memory-tile.flipped{ background:white; border:3px solid var(--teal); }
+  .memory-tile.matched{ background:#d4f5e1; border:3px solid var(--green); cursor:default; }
+  .game-status{ font-weight:bold; color:var(--navy); margin-bottom:14px; min-height:24px; }
+  .closeGameBtn{ background:var(--teal); color:white; }
+  .closeGameBtn:hover{ background:#239e92; }
+  .simon-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin:0 auto 18px; max-width:280px; }
+  .simon-tile{ aspect-ratio:1/1; border-radius:16px; cursor:pointer; opacity:0.55; transition:opacity 0.15s, transform 0.1s; }
+  .simon-tile.lit{ opacity:1; transform:scale(0.96); }
+  .simon-tile.red{ background:#d62828; }
+  .simon-tile.green{ background:#2a9d8f; }
+  .simon-tile.teal{ background:#1d3557; }
+  .simon-tile.gold{ background:#e9c46a; }
+  .seq-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin:0 auto 18px; max-width:400px; }
+  .seq-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.6em;
+    font-weight:bold;
+    cursor:pointer;
+    user-select:none;
+  }
+  .seq-tile.used{ background:#d4f5e1; color:var(--green); cursor:default; }
+  .seq-tile.wrong{ background:var(--red); }
+</style>
+</head>
+<body>
+
+<a class="backlink" href="bradley_hub.html">&larr; Back to profile</a>
+<div class="header">
+  <h1>🔤 Bradley's Phonics Practice</h1>
+  <p>Blends &amp; digraphs — click the missing letters!</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="scoreNum">0</div><div class="label">Correct</div></div>
+  <div class="stat"><div class="num" id="attemptNum">0</div><div class="label">Attempted</div></div>
+  <div class="stat"><div class="num" id="streakNum">0</div><div class="label">Streak 🔥</div></div>
+  <div class="stat"><div class="num" id="bestNum">0</div><div class="label">Best Streak</div></div>
+</div>
+
+<div class="card">
+  <div class="tag" id="tag">PHONICS</div>
+  <div class="qword" id="qword">__ip</div>
+  <div class="qhint" id="qhint">(water falls down in small amounts)</div>
+  <div class="choice-grid" id="choiceGrid"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explainBox"></div>
+  <div class="actions">
+    <button id="skipBtn" onclick="skipProblem()">Skip</button>
+    <button id="nextBtn" onclick="nextProblem()">Next Word →</button>
+  </div>
+</div>
+
+<div class="topics">New blends and digraphs keep coming — keep going as long as you like!</div>
+
+<div class="overlay" id="rewardOverlay">
+  <div class="game-card">
+    <h2 id="gameTitle">🎉 12 in a Row!</h2>
+    <div class="sub" id="gameSub">You unlocked a game!</div>
+    <div class="game-status" id="gameStatus">Find all the matching pairs!</div>
+    <div id="gameContent"></div>
+    <button class="closeGameBtn" id="backToPhonicsBtn" onclick="closeRewardGame()">Back to Phonics →</button>
+  </div>
+</div>
+
+<script>
+let score = 0, attempts = 0, streak = 0, best = 0;
+let current = null;
+let misses = 0;
+let pool = [];
+let queueIdx = 0;
+
+function randInt(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const PHONICS_BANK = [
+  { word: '___ip', hint: '(water falls down in small amounts — "drip")', ans: 'dr', choices: ['dr','fl','st','cl'] },
+  { word: '___ag', hint: '(a piece of cloth that represents a country — "flag")', ans: 'fl', choices: ['fl','cl','gr','sm'] },
+  { word: '___og', hint: '(a hopping amphibian — "frog")', ans: 'fr', choices: ['fr','gr','br','tr'] },
+  { word: 'fi___', hint: '(an animal that lives in water and has fins — "fish")', ans: 'sh', choices: ['sh','ch','th','wh'] },
+  { word: '___air', hint: '(a piece of furniture you sit on — "chair")', ans: 'ch', choices: ['ch','sh','th','wh'] },
+  { word: '___under', hint: '(a loud sound during a storm — "thunder")', ans: 'th', choices: ['th','wh','ch','sh'] },
+  { word: '___eel', hint: '(the steering ___ of a car — "wheel")', ans: 'wh', choices: ['wh','th','sh','ch'] },
+  { word: '___ass', hint: '(green stuff that grows in a lawn — "grass")', ans: 'gr', choices: ['gr','fl','dr','sw'] },
+  { word: '___ow', hint: '(white frozen stuff that falls in winter — "snow")', ans: 'sn', choices: ['sn','sw','sp','st'] },
+  { word: '___im', hint: '(to move through water with your arms and legs — "swim")', ans: 'sw', choices: ['sw','sp','sn','sl'] },
+  { word: '___ide', hint: '(to move smoothly, like on ice — "slide")', ans: 'sl', choices: ['sl','sw','sp','st'] },
+  { word: '___ar', hint: '(a bright object you see in the night sky — "star")', ans: 'st', choices: ['st','sp','sk','sn'] },
+  { word: 'bla___', hint: '(the color of night — "black")', ans: 'ck', choices: ['ck','ch','sh','th'] },
+  { word: 'ri___', hint: '(the sound a phone makes, or what bells do — "ring")', ans: 'ng', choices: ['ng','nk','nd','ny'] }
+];
+
+function buildPool(){
+  pool = shuffle(PHONICS_BANK.map(item => ({
+    tag: 'PHONICS',
+    word: item.word,
+    hint: item.hint,
+    choices: item.choices.map(c => ({ value: c, label: c })),
+    ans: item.ans,
+    explain: `<div class="vlabel">The word is "<b>${item.word.replace('___', item.ans)}</b>." The letters "<b>${item.ans}</b>" make that sound at the ${item.word.startsWith('___') ? 'beginning' : 'end'} of the word.</div>`
+  })));
+  queueIdx = 0;
+}
+
+function skipProblem(){
+  nextProblem();
+}
+
+function nextProblem(){
+  if (queueIdx >= pool.length) {
+    pool = shuffle(pool);
+    queueIdx = 0;
+  }
+  current = pool[queueIdx];
+  queueIdx++;
+  misses = 0;
+
+  document.getElementById('tag').textContent = current.tag;
+  document.getElementById('qword').textContent = current.word;
+  document.getElementById('qhint').textContent = current.hint;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('explainBox').classList.remove('show');
+  document.getElementById('nextBtn').style.display = 'none';
+
+  const choiceGrid = document.getElementById('choiceGrid');
+  choiceGrid.innerHTML = '';
+  current.choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.label;
+    btn.onclick = () => selectChoice(choice.value, btn);
+    choiceGrid.appendChild(btn);
+  });
+}
+
+function selectChoice(val, clickedBtn){
+  const fb = document.getElementById('feedback');
+  const ex = document.getElementById('explainBox');
+
+  if (val === current.ans) {
+    attempts++;
+    score++; streak++;
+    if (streak > best) best = streak;
+    clickedBtn.classList.add('picked-correct');
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    fb.textContent = '✅ Correct!';
+    fb.className = 'feedback correct';
+    ex.classList.remove('show');
+    updateStats();
+    document.getElementById('nextBtn').style.display = 'inline-block';
+  } else {
+    misses++;
+    clickedBtn.classList.add('picked-wrong');
+    clickedBtn.disabled = true;
+    if (misses >= 2) {
+      attempts++;
+      streak = 0;
+      document.querySelectorAll('.choice-btn').forEach((b, i) => {
+        b.disabled = true;
+        if (current.choices[i].value === current.ans) b.classList.add('picked-correct');
+      });
+      fb.textContent = "❌ Not quite — here's the answer:";
+      fb.className = 'feedback incorrect';
+      ex.innerHTML = current.explain;
+      ex.classList.add('show');
+      updateStats();
+      document.getElementById('nextBtn').style.display = 'inline-block';
+    } else {
+      fb.textContent = 'Not quite — try again!';
+      fb.className = 'feedback incorrect';
+    }
+  }
+}
+
+function updateStats(){
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('attemptNum').textContent = attempts;
+  document.getElementById('streakNum').textContent = streak;
+  document.getElementById('bestNum').textContent = best;
+  if (streak > 0 && streak % 12 === 0) {
+    openRewardGame();
+  }
+}
+
+// ---- Reward Games (rotates through 3 different mini-games) ----
+let rewardCount = 0;
+const EMOJIS = ['🚀','⭐','🐉','🍕','🎲','🦄','🌈','🎮'];
+let memState = { first:null, lock:false, matchedCount:0 };
+let seqState = { next:1 };
+let simonState = { sequence:[], playerStep:0, playing:false };
+
+function openRewardGame(){
+  const overlay = document.getElementById('rewardOverlay');
+  overlay.classList.add('show');
+  const gameType = rewardCount % 3;
+  rewardCount++;
+  if(gameType === 0) setupMemoryGame();
+  else if(gameType === 1) setupSequenceGame();
+  else setupSimonGame();
+}
+
+function closeRewardGame(){
+  document.getElementById('rewardOverlay').classList.remove('show');
+  simonState.playing = false;
+}
+
+function setupMemoryGame(){
+  document.getElementById('gameTitle').textContent = '🎉 12 in a Row!';
+  document.getElementById('gameSub').textContent = 'You unlocked Memory Match!';
+  document.getElementById('gameStatus').textContent = 'Find all the matching pairs!';
+  const chosen = [...EMOJIS].sort(()=>Math.random()-0.5).slice(0,6);
+  let deck = [...chosen, ...chosen].sort(()=>Math.random()-0.5);
+  memState = { first:null, lock:false, matchedCount:0 };
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="memory-grid" id="memoryGrid"></div>';
+  const grid = document.getElementById('memoryGrid');
+  deck.forEach((emoji, idx)=>{
+    const tile = document.createElement('div');
+    tile.className = 'memory-tile';
+    tile.dataset.idx = idx;
+    tile.dataset.emoji = emoji;
+    tile.textContent = '❓';
+    tile.onclick = ()=>flipTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function flipTile(tile){
+  if(memState.lock) return;
+  if(tile.classList.contains('flipped') || tile.classList.contains('matched')) return;
+  tile.classList.add('flipped');
+  tile.textContent = tile.dataset.emoji;
+  if(memState.first === null){
+    memState.first = tile;
+  } else {
+    const first = memState.first, second = tile;
+    if(first.dataset.emoji === second.dataset.emoji){
+      first.classList.add('matched');
+      second.classList.add('matched');
+      memState.first = null;
+      memState.matchedCount++;
+      if(memState.matchedCount === 6){
+        document.getElementById('gameStatus').textContent = '🏆 You matched them all! Great job!';
+      }
+    } else {
+      memState.lock = true;
+      setTimeout(()=>{
+        first.classList.remove('flipped'); first.textContent = '❓';
+        second.classList.remove('flipped'); second.textContent = '❓';
+        memState.first = null; memState.lock = false;
+      }, 700);
+    }
+  }
+}
+
+function setupSequenceGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Another Streak!';
+  document.getElementById('gameSub').textContent = 'You unlocked Number Rush!';
+  document.getElementById('gameStatus').textContent = 'Click the numbers 1 → 12 in order, as fast as you can!';
+  seqState = { next:1 };
+  const nums = Array.from({length:12}, (_,i)=>i+1).sort(()=>Math.random()-0.5);
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="seq-grid" id="seqGrid"></div>';
+  const grid = document.getElementById('seqGrid');
+  nums.forEach(n=>{
+    const tile = document.createElement('div');
+    tile.className = 'seq-tile';
+    tile.textContent = n;
+    tile.dataset.num = n;
+    tile.onclick = ()=>clickSeqTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function clickSeqTile(tile){
+  const num = Number(tile.dataset.num);
+  if(tile.classList.contains('used')) return;
+  if(num === seqState.next){
+    tile.classList.add('used');
+    seqState.next++;
+    if(seqState.next === 13){
+      document.getElementById('gameStatus').textContent = '🏆 Awesome! You got them all in order!';
+    }
+  } else {
+    tile.classList.add('wrong');
+    setTimeout(()=>tile.classList.remove('wrong'), 300);
+  }
+}
+
+function setupSimonGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Streak Power!';
+  document.getElementById('gameSub').textContent = 'You unlocked Color Memory!';
+  document.getElementById('gameStatus').textContent = 'Watch the pattern, then repeat it!';
+  simonState = { sequence:[], playerStep:0, playing:false };
+  const colors = ['red','green','teal','gold'];
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="simon-grid" id="simonGrid"></div>';
+  const grid = document.getElementById('simonGrid');
+  colors.forEach(c=>{
+    const tile = document.createElement('div');
+    tile.className = 'simon-tile ' + c;
+    tile.dataset.color = c;
+    tile.onclick = ()=>simonClick(tile);
+    grid.appendChild(tile);
+  });
+  simonState.sequence = [colors[randInt(0,3)]];
+  setTimeout(()=>playSimonSequence(), 600);
+}
+
+function playSimonSequence(){
+  simonState.playing = true;
+  simonState.playerStep = 0;
+  document.getElementById('gameStatus').textContent = 'Watch closely...';
+  const grid = document.getElementById('simonGrid');
+  let i = 0;
+  const interval = setInterval(()=>{
+    if(i > 0){
+      const prevTile = grid.querySelector(`[data-color="${simonState.sequence[i-1]}"]`);
+      if(prevTile) prevTile.classList.remove('lit');
+    }
+    if(i >= simonState.sequence.length){
+      clearInterval(interval);
+      simonState.playing = false;
+      document.getElementById('gameStatus').textContent = `Your turn! Repeat the pattern (${simonState.sequence.length} step${simonState.sequence.length>1?'s':''}).`;
+      return;
+    }
+    const tile = grid.querySelector(`[data-color="${simonState.sequence[i]}"]`);
+    if(tile) tile.classList.add('lit');
+    i++;
+  }, 700);
+}
+
+function simonClick(tile){
+  if(simonState.playing) return;
+  const color = tile.dataset.color;
+  tile.classList.add('lit');
+  setTimeout(()=>tile.classList.remove('lit'), 250);
+  if(color === simonState.sequence[simonState.playerStep]){
+    simonState.playerStep++;
+    if(simonState.playerStep === simonState.sequence.length){
+      if(simonState.sequence.length >= 6){
+        document.getElementById('gameStatus').textContent = '🏆 Amazing memory! You completed it!';
+        return;
+      }
+      const colors = ['red','green','teal','gold'];
+      simonState.sequence.push(colors[randInt(0,3)]);
+      document.getElementById('gameStatus').textContent = 'Nice! Get ready for the next round...';
+      setTimeout(()=>playSimonSequence(), 900);
+    }
+  } else {
+    document.getElementById('gameStatus').textContent = '❌ Oops, that broke the pattern. Try again!';
+    simonState.sequence = [simonState.sequence[0]];
+    setTimeout(()=>playSimonSequence(), 1000);
+  }
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  if(document.getElementById('rewardOverlay').classList.contains('show')){
+    closeRewardGame();
+    return;
+  }
+  if(document.getElementById('nextBtn').style.display !== 'none'){
+    nextProblem();
+  }
+});
+
+buildPool();
+nextProblem();
+</script>
+</body>
+</html>

@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bradley's Sight Words</title>
+<style>
+  :root{
+    --navy:#1a1a1a;
+    --gold:#e63946;
+    --teal:#4a4a4a;
+    --cream:#f5f1ee;
+    --red:#d62828;
+    --green:#3aa655;
+    --purple:#2b2b2b;
+    --blue:#2b6cb0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+    background:linear-gradient(160deg, #1a0000 0%, #4a0404 35%, #7a0c0c 65%, #1a0000 100%);
+    color:var(--navy);
+    padding:24px;
+    min-height:100vh;
+  }
+  a.backlink{
+    display:inline-block;
+    color:#f4a8a8;
+    font-weight:bold;
+    text-decoration:none;
+    margin-bottom:10px;
+  }
+  .header{
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .header h1{
+    font-size:2.1em;
+    margin:0;
+    color:#ffffff;
+    text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .header p{
+    color:#f4a8a8;
+    font-weight:bold;
+    margin:6px 0 0;
+  }
+  .stats{
+    display:flex;
+    justify-content:center;
+    gap:24px;
+    margin-bottom:24px;
+    flex-wrap:wrap;
+  }
+  .stat{
+    background:white;
+    border:3px solid var(--navy);
+    border-radius:12px;
+    padding:10px 18px;
+    text-align:center;
+    min-width:110px;
+  }
+  .stat .num{
+    font-size:1.6em;
+    font-weight:bold;
+    color:var(--navy);
+  }
+  .stat .label{
+    font-size:0.85em;
+    color:var(--teal);
+    font-weight:bold;
+  }
+  .card{
+    max-width:560px;
+    margin:0 auto;
+    background:white;
+    border:4px solid var(--navy);
+    border-radius:20px;
+    padding:28px 26px;
+    text-align:center;
+  }
+  .tag{
+    display:inline-block;
+    background:var(--purple);
+    color:white;
+    font-size:0.8em;
+    font-weight:bold;
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:14px;
+    letter-spacing:0.5px;
+  }
+  .wordtext{
+    font-size:2.4em;
+    font-weight:bold;
+    margin:10px 0 22px;
+  }
+  .sentencetext{
+    font-size:1.5em;
+    font-weight:bold;
+    margin:10px 0 22px;
+    line-height:1.4;
+  }
+  .mic-indicator{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin:10px 0 18px;
+    font-size:0.95em;
+    color:var(--teal);
+    font-weight:bold;
+  }
+  .mic-dot{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:#ccc;
+  }
+  .mic-dot.active{
+    background:var(--blue);
+  }
+  .actions{
+    margin-top:18px;
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  button{
+    border:none;
+    border-radius:10px;
+    padding:12px 22px;
+    font-size:1.05em;
+    font-weight:bold;
+    cursor:pointer;
+  }
+  #skipBtn, #restartBtn{ background:var(--teal); color:white; }
+  #skipBtn:hover, #restartBtn:hover{ background:#666; }
+  .feedback{
+    margin-top:18px;
+    font-size:1.3em;
+    font-weight:bold;
+    min-height:32px;
+  }
+  .correct{ color:var(--green); }
+  .incorrect{ color:var(--red); }
+  .topics{
+    text-align:center;
+    margin-top:24px;
+    font-size:0.9em;
+    color:#e3b8b8;
+  }
+  .overlay{
+    display:none;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(27,42,74,0.85);
+    z-index:999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .overlay.show{ display:flex; }
+  .game-card{
+    background:var(--cream);
+    border:5px solid var(--gold);
+    border-radius:20px;
+    padding:24px;
+    max-width:480px;
+    width:100%;
+    text-align:center;
+  }
+  .game-card h2{
+    margin:0 0 6px;
+    color:var(--navy);
+  }
+  .game-card .sub{
+    color:var(--purple);
+    font-weight:bold;
+    margin-bottom:16px;
+  }
+  .memory-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:400px;
+  }
+  .memory-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.8em;
+    cursor:pointer;
+    user-select:none;
+    transition:transform 0.15s;
+  }
+  .memory-tile.flipped{
+    background:white;
+    border:3px solid var(--teal);
+  }
+  .memory-tile.matched{
+    background:#d4f5e1;
+    border:3px solid var(--green);
+    cursor:default;
+  }
+  .game-status{
+    font-weight:bold;
+    color:var(--navy);
+    margin-bottom:14px;
+    min-height:24px;
+  }
+  .closeGameBtn{
+    background:var(--teal);
+    color:white;
+  }
+  .closeGameBtn:hover{ background:#239e92; }
+  .simon-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:280px;
+  }
+  .simon-tile{
+    aspect-ratio:1/1;
+    border-radius:16px;
+    cursor:pointer;
+    opacity:0.55;
+    transition:opacity 0.15s, transform 0.1s;
+  }
+  .simon-tile.lit{
+    opacity:1;
+    transform:scale(0.96);
+  }
+  .simon-tile.red{ background:#d62828; }
+  .simon-tile.green{ background:#2a9d8f; }
+  .simon-tile.teal{ background:#1d3557; }
+  .simon-tile.gold{ background:#e9c46a; }
+  .seq-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:400px;
+  }
+  .seq-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.6em;
+    font-weight:bold;
+    cursor:pointer;
+    user-select:none;
+  }
+  .seq-tile.used{
+    background:#d4f5e1;
+    color:var(--green);
+    cursor:default;
+  }
+  .seq-tile.wrong{
+    background:var(--red);
+  }
+  textarea#wordlist{
+    width:100%;
+    font-size:14px;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+  }
+  select#roundSize{
+    font-size:14px;
+    padding:6px 10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+  }
+  #supportWarning{
+    color:var(--red);
+    font-size:14px;
+  }
+</style>
+</head>
+<body>
+
+<a class="backlink" href="bradley_hub.html">&larr; Back to profile</a>
+
+<div id="setup">
+  <div class="header">
+    <h1>📖 Bradley's Sight Words</h1>
+    <p>1st &amp; 2nd Grade Sight Words — say each word out loud!</p>
+  </div>
+  <div class="card">
+    <button type="button" id="toggleWordlistBtn" style="background:none;border:none;color:var(--blue);font-size:13px;font-weight:bold;cursor:pointer;padding:0;margin-bottom:10px;text-decoration:underline;">Customize word list</button>
+    <div id="wordlistWrap" style="display:none;text-align:left;">
+      <textarea id="wordlist" rows="6">about, after, again, an, any, as, ask, by, could, every, fly, from, give, going, had, has, her, him, his, how, just, know, let, live, may, of, old, once, open, over, put, round, some, stop, take, thank, them, then, think, walk, were, when, also, always, around, because, been, before, best, both, buy, call, cold, does, don't, fast, first, five, found, gave, goes, green, its, made, many, off, or, pull, read, right, sing, sit, sleep, tell, their, these, those, upon, us, use, very, wash, which, why, wish, work, would, write, your</textarea>
+    </div>
+    <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:10px;">
+      <label style="font-size:13px;color:var(--teal);font-weight:bold;">Words this round</label>
+      <select id="roundSize">
+        <option value="10">10</option>
+        <option value="15" selected>15</option>
+        <option value="20">20</option>
+        <option value="9999">All</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button id="startBtn" style="background:var(--blue);color:white;">▶ Start practice</button>
+    </div>
+    <p id="supportWarning" style="display:none;">Speech recognition isn't supported in this browser. Please use Chrome.</p>
+  </div>
+</div>
+
+<div id="practice" style="display:none;">
+  <div class="header">
+    <h1>📖 Bradley's Sight Words</h1>
+    <p id="modeLabel">Say each word out loud</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="wordNumStat">1</div><div class="label">Word</div></div>
+    <div class="stat"><div class="num" id="wordTotalStat">15</div><div class="label">Total</div></div>
+    <div class="stat"><div class="num" id="score">0</div><div class="label">Correct 🔥</div></div>
+  </div>
+
+  <div class="card">
+    <div class="tag" id="practiceTag">SIGHT WORD</div>
+    <p class="wordtext" id="currentWord" style="display:none;">the</p>
+    <p class="sentencetext" id="currentSentence" style="display:none;"></p>
+    <div class="mic-indicator">
+      <span class="mic-dot" id="micDot"></span>
+      <span id="micLabel">Listening continuously — just say it!</span>
+    </div>
+    <p class="feedback" id="feedback"></p>
+    <div class="actions">
+      <button id="skipBtn">Skip</button>
+      <button id="restartBtn">↻ Restart</button>
+    </div>
+  </div>
+
+  <div class="topics" id="unlockMsg">Get all of this round's words correct to unlock 2 bonus sentences!</div>
+</div>
+
+<div id="done" style="display:none;">
+  <div class="header">
+    <h1>🎉 Great job, Bradley!</h1>
+    <p>You finished this round</p>
+  </div>
+  <div class="card">
+    <p style="font-size:1.2em;">Words correct: <b id="finalWordScore"></b> / <b id="finalWordTotal"></b></p>
+    <p style="font-size:1.2em;">Sentences read: <b id="finalSentenceScore"></b> / 2</p>
+    <div class="actions">
+      <button id="againBtn" style="background:var(--blue);color:white;">↻ Practice again</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="rewardOverlay">
+  <div class="game-card">
+    <h2 id="gameTitle">🎉 12 in a Row!</h2>
+    <div class="sub" id="gameSub">You unlocked a game!</div>
+    <div class="game-status" id="gameStatus">Find all the matching pairs!</div>
+    <div id="gameContent"></div>
+    <button class="closeGameBtn" id="backToReadingBtn" onclick="closeRewardGame()">Back to Reading →</button>
+  </div>
+</div>
+
+<script>
+let words = [];
+let idx = 0;
+let score = 0;
+let streak = 0;
+let best = 0;
+let misses = 0;
+let stage = 'words';
+let sentenceIdx = 0;
+let sentenceScore = 0;
+let recognition = null;
+let active = false;
+let processingResult = false;
+
+const SENTENCE_BANK = [
+  "The cat ran fast to the big tree.",
+  "We found five red apples on the table.",
+  "Could you read this book to me?",
+  "Her friend was happy to play outside.",
+  "I think we should go before it gets cold.",
+  "They walked around the park many times.",
+  "Once upon a time, a green frog sat by the pond.",
+  "Every day, I wash my hands and brush my teeth."
+];
+
+const setupEl = document.getElementById('setup');
+const practiceEl = document.getElementById('practice');
+const doneEl = document.getElementById('done');
+const supportWarning = document.getElementById('supportWarning');
+const micDot = document.getElementById('micDot');
+
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SpeechRec) {
+  supportWarning.style.display = 'block';
+}
+
+function randInt(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function normalize(s) {
+  return s.toLowerCase().replace(/[^a-z']/g, '');
+}
+
+function normalizeSentence(s) {
+  return s.toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function speak(text, onDone) {
+  if (!window.speechSynthesis) { if (onDone) onDone(); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.85;
+  u.onend = () => { if (onDone) onDone(); };
+  u.onerror = () => { if (onDone) onDone(); };
+  window.speechSynthesis.speak(u);
+}
+
+function pauseListening(){
+  active = false;
+  if (recognition) { try { recognition.stop(); } catch (e) {} }
+}
+
+function resumeListening(){
+  active = true;
+  try { recognition.start(); } catch (e) {}
+}
+
+document.getElementById('toggleWordlistBtn').addEventListener('click', () => {
+  const wrap = document.getElementById('wordlistWrap');
+  const btn = document.getElementById('toggleWordlistBtn');
+  const isHidden = wrap.style.display === 'none';
+  wrap.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Hide word list' : 'Customize word list';
+});
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  const raw = document.getElementById('wordlist').value;
+  let all = shuffle(raw.split(',').map(w => w.trim().toLowerCase()).filter(Boolean));
+  const size = parseInt(document.getElementById('roundSize').value, 10);
+  words = all.slice(0, Math.min(size, all.length));
+  if (words.length === 0) return;
+  idx = 0; score = 0; streak = 0; best = 0; stage = 'words'; sentenceIdx = 0; sentenceScore = 0;
+  setupEl.style.display = 'none';
+  practiceEl.style.display = 'block';
+  doneEl.style.display = 'none';
+  document.getElementById('wordTotalStat').textContent = words.length;
+  document.getElementById('unlockMsg').textContent = `Get all ${words.length} words correct to unlock 2 bonus sentences!`;
+  showWord();
+  if (SpeechRec) startListeningSession();
+});
+
+function showWord() {
+  misses = 0;
+  document.getElementById('wordNumStat').textContent = idx + 1;
+  document.getElementById('score').textContent = score;
+  document.getElementById('practiceTag').textContent = 'SIGHT WORD';
+  document.getElementById('currentWord').style.display = 'block';
+  document.getElementById('currentSentence').style.display = 'none';
+  document.getElementById('currentWord').textContent = words[idx];
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('micLabel').textContent = 'Listening continuously — just say it!';
+}
+
+function showSentence() {
+  misses = 0;
+  document.getElementById('practiceTag').textContent = 'BONUS SENTENCE ' + (sentenceIdx + 1) + ' OF 2';
+  document.getElementById('currentWord').style.display = 'none';
+  document.getElementById('currentSentence').style.display = 'block';
+  document.getElementById('currentSentence').textContent = window.currentSentenceText;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('micLabel').textContent = 'Read the whole sentence out loud!';
+}
+
+function startSentenceStage() {
+  stage = 'sentences';
+  document.getElementById('modeLabel').textContent = 'Unlocked! Read these 2 sentences out loud';
+  const picks = shuffle([...SENTENCE_BANK]).slice(0, 2);
+  window.sentenceList = picks;
+  sentenceIdx = 0;
+  window.currentSentenceText = window.sentenceList[sentenceIdx];
+  showSentence();
+}
+
+function buildRecognizer(){
+  recognition = new SpeechRec();
+  recognition.lang = 'en-US';
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 3;
+
+  recognition.onstart = () => { micDot.classList.add('active'); };
+  recognition.onerror = (e) => {
+    if (e.error === 'no-speech' || e.error === 'aborted') return;
+    micDot.classList.remove('active');
+    document.getElementById('feedback').textContent = 'Mic error: ' + e.error;
+    document.getElementById('feedback').className = 'feedback incorrect';
+  };
+  recognition.onend = () => {
+    micDot.classList.remove('active');
+    if (active) { try { recognition.start(); } catch (e) {} }
+  };
+
+  recognition.onresult = (event) => {
+    if (processingResult) return;
+    const lastResult = event.results[event.results.length - 1];
+    const feedback = document.getElementById('feedback');
+
+    if (stage === 'words') {
+      const target = normalize(words[idx]);
+      let matched = false;
+      for (let i = 0; i < lastResult.length; i++) {
+        if (normalize(lastResult[i].transcript) === target) { matched = true; break; }
+      }
+      if (matched) {
+        processingResult = true;
+        score++; streak++; if (streak > best) best = streak;
+        document.getElementById('score').textContent = score;
+        feedback.textContent = 'Correct! Nice reading.';
+        feedback.className = 'feedback correct';
+        checkStreakReward();
+        setTimeout(() => { processingResult = false; nextWord(); }, 1100);
+      } else {
+        misses++;
+        if (misses >= 2) {
+          processingResult = true;
+          feedback.textContent = `Not quite — the word is "${words[idx]}". Say it with me!`;
+          feedback.className = 'feedback incorrect';
+          pauseListening();
+          speak(words[idx], () => {
+            setTimeout(() => {
+              processingResult = false;
+              resumeListening();
+            }, 300);
+          });
+        } else {
+          feedback.textContent = `Heard "${lastResult[0].transcript}" — try once more`;
+          feedback.className = 'feedback incorrect';
+        }
+      }
+    } else if (stage === 'sentences') {
+      const target = normalizeSentence(window.currentSentenceText);
+      const heard = normalizeSentence(lastResult[0].transcript);
+      const targetWords = target.split(' ');
+      const heardWords = new Set(heard.split(' '));
+      const matchedCount = targetWords.filter(w => heardWords.has(w)).length;
+      const matched = matchedCount >= Math.ceil(targetWords.length * 0.8);
+      if (matched) {
+        processingResult = true;
+        sentenceScore++;
+        feedback.textContent = 'Great reading!';
+        feedback.className = 'feedback correct';
+        setTimeout(() => { processingResult = false; nextSentence(); }, 1300);
+      } else {
+        misses++;
+        if (misses >= 2) {
+          processingResult = true;
+          feedback.textContent = "Let's try that sentence together!";
+          feedback.className = 'feedback incorrect';
+          pauseListening();
+          speak(window.currentSentenceText, () => {
+            setTimeout(() => {
+              processingResult = false;
+              const isLastSentence = (sentenceIdx + 1) >= window.sentenceList.length;
+              nextSentence();
+              if (!isLastSentence) resumeListening();
+            }, 300);
+          });
+        } else {
+          feedback.textContent = `Heard "${lastResult[0].transcript}" — try once more`;
+          feedback.className = 'feedback incorrect';
+        }
+      }
+    }
+  };
+}
+
+function startListeningSession(){
+  active = true;
+  buildRecognizer();
+  try { recognition.start(); } catch (e) {}
+}
+
+function stopListeningSession(){
+  active = false;
+  if (recognition) { try { recognition.stop(); } catch (e) {} }
+}
+
+function checkStreakReward(){
+  if (streak > 0 && streak % 12 === 0) {
+    openRewardGame();
+  }
+}
+
+document.getElementById('skipBtn').addEventListener('click', () => {
+  if (stage === 'words') nextWord();
+  else nextSentence();
+});
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  stopListeningSession();
+  setupEl.style.display = 'block';
+  practiceEl.style.display = 'none';
+  doneEl.style.display = 'none';
+});
+
+document.getElementById('againBtn').addEventListener('click', () => {
+  idx = 0; score = 0; streak = 0; stage = 'words'; sentenceIdx = 0; sentenceScore = 0;
+  words = shuffle(words);
+  doneEl.style.display = 'none';
+  practiceEl.style.display = 'block';
+  document.getElementById('modeLabel').textContent = 'Say each word out loud';
+  showWord();
+  if (SpeechRec) startListeningSession();
+});
+
+function nextWord(){
+  idx++;
+  if (idx >= words.length) {
+    startSentenceStage();
+  } else {
+    showWord();
+  }
+}
+
+function nextSentence(){
+  sentenceIdx++;
+  if (sentenceIdx >= window.sentenceList.length) {
+    finishRound();
+  } else {
+    window.currentSentenceText = window.sentenceList[sentenceIdx];
+    showSentence();
+  }
+}
+
+function finishRound(){
+  stopListeningSession();
+  practiceEl.style.display = 'none';
+  doneEl.style.display = 'block';
+  document.getElementById('finalWordScore').textContent = score;
+  document.getElementById('finalWordTotal').textContent = words.length;
+  document.getElementById('finalSentenceScore').textContent = sentenceScore;
+}
+
+// ---- Reward Games (rotates through 3 different mini-games) ----
+let rewardCount = 0;
+const EMOJIS = ['🚀','⭐','🐉','🍕','🎲','🦄','🌈','🎮'];
+let memState = { first:null, lock:false, matchedCount:0 };
+let seqState = { next:1 };
+let simonState = { sequence:[], playerStep:0, playing:false };
+
+function openRewardGame(){
+  const overlay = document.getElementById('rewardOverlay');
+  overlay.classList.add('show');
+  const gameType = rewardCount % 3;
+  rewardCount++;
+  if(gameType === 0) setupMemoryGame();
+  else if(gameType === 1) setupSequenceGame();
+  else setupSimonGame();
+}
+
+function closeRewardGame(){
+  document.getElementById('rewardOverlay').classList.remove('show');
+  simonState.playing = false;
+}
+
+// Game 1: Memory Match
+function setupMemoryGame(){
+  document.getElementById('gameTitle').textContent = '🎉 12 in a Row!';
+  document.getElementById('gameSub').textContent = 'You unlocked Memory Match!';
+  document.getElementById('gameStatus').textContent = 'Find all the matching pairs!';
+  const chosen = [...EMOJIS].sort(()=>Math.random()-0.5).slice(0,6);
+  let deck = [...chosen, ...chosen].sort(()=>Math.random()-0.5);
+  memState = { first:null, lock:false, matchedCount:0 };
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="memory-grid" id="memoryGrid"></div>';
+  const grid = document.getElementById('memoryGrid');
+  deck.forEach((emoji, idx)=>{
+    const tile = document.createElement('div');
+    tile.className = 'memory-tile';
+    tile.dataset.idx = idx;
+    tile.dataset.emoji = emoji;
+    tile.textContent = '❓';
+    tile.onclick = ()=>flipTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function flipTile(tile){
+  if(memState.lock) return;
+  if(tile.classList.contains('flipped') || tile.classList.contains('matched')) return;
+  tile.classList.add('flipped');
+  tile.textContent = tile.dataset.emoji;
+  if(memState.first === null){
+    memState.first = tile;
+  } else {
+    const first = memState.first, second = tile;
+    if(first.dataset.emoji === second.dataset.emoji){
+      first.classList.add('matched');
+      second.classList.add('matched');
+      memState.first = null;
+      memState.matchedCount++;
+      if(memState.matchedCount === 6){
+        document.getElementById('gameStatus').textContent = '🏆 You matched them all! Great job!';
+      }
+    } else {
+      memState.lock = true;
+      setTimeout(()=>{
+        first.classList.remove('flipped'); first.textContent = '❓';
+        second.classList.remove('flipped'); second.textContent = '❓';
+        memState.first = null; memState.lock = false;
+      }, 700);
+    }
+  }
+}
+
+// Game 2: Number Sequence (click 1-12 in order, shuffled positions)
+function setupSequenceGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Another Streak!';
+  document.getElementById('gameSub').textContent = 'You unlocked Number Rush!';
+  document.getElementById('gameStatus').textContent = 'Click the numbers 1 → 12 in order, as fast as you can!';
+  seqState = { next:1 };
+  const nums = Array.from({length:12}, (_,i)=>i+1).sort(()=>Math.random()-0.5);
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="seq-grid" id="seqGrid"></div>';
+  const grid = document.getElementById('seqGrid');
+  nums.forEach(n=>{
+    const tile = document.createElement('div');
+    tile.className = 'seq-tile';
+    tile.textContent = n;
+    tile.dataset.num = n;
+    tile.onclick = ()=>clickSeqTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function clickSeqTile(tile){
+  const num = Number(tile.dataset.num);
+  if(tile.classList.contains('used')) return;
+  if(num === seqState.next){
+    tile.classList.add('used');
+    seqState.next++;
+    if(seqState.next === 13){
+      document.getElementById('gameStatus').textContent = '🏆 Awesome! You got them all in order!';
+    }
+  } else {
+    tile.classList.add('wrong');
+    setTimeout(()=>tile.classList.remove('wrong'), 300);
+  }
+}
+
+// Game 3: Simon-style color memory
+function setupSimonGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Streak Power!';
+  document.getElementById('gameSub').textContent = 'You unlocked Color Memory!';
+  document.getElementById('gameStatus').textContent = 'Watch the pattern, then repeat it!';
+  simonState = { sequence:[], playerStep:0, playing:false };
+  const colors = ['red','green','teal','gold'];
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="simon-grid" id="simonGrid"></div>';
+  const grid = document.getElementById('simonGrid');
+  colors.forEach(c=>{
+    const tile = document.createElement('div');
+    tile.className = 'simon-tile ' + c;
+    tile.dataset.color = c;
+    tile.onclick = ()=>simonClick(tile);
+    grid.appendChild(tile);
+  });
+  simonState.sequence = [colors[randInt(0,3)]];
+  setTimeout(()=>playSimonSequence(), 600);
+}
+
+function playSimonSequence(){
+  simonState.playing = true;
+  simonState.playerStep = 0;
+  document.getElementById('gameStatus').textContent = 'Watch closely...';
+  const grid = document.getElementById('simonGrid');
+  let i = 0;
+  const interval = setInterval(()=>{
+    if(i > 0){
+      const prevTile = grid.querySelector(`[data-color="${simonState.sequence[i-1]}"]`);
+      if(prevTile) prevTile.classList.remove('lit');
+    }
+    if(i >= simonState.sequence.length){
+      clearInterval(interval);
+      simonState.playing = false;
+      document.getElementById('gameStatus').textContent = `Your turn! Repeat the pattern (${simonState.sequence.length} step${simonState.sequence.length>1?'s':''}).`;
+      return;
+    }
+    const tile = grid.querySelector(`[data-color="${simonState.sequence[i]}"]`);
+    if(tile) tile.classList.add('lit');
+    i++;
+  }, 700);
+}
+
+function simonClick(tile){
+  if(simonState.playing) return;
+  const color = tile.dataset.color;
+  tile.classList.add('lit');
+  setTimeout(()=>tile.classList.remove('lit'), 250);
+  if(color === simonState.sequence[simonState.playerStep]){
+    simonState.playerStep++;
+    if(simonState.playerStep === simonState.sequence.length){
+      if(simonState.sequence.length >= 6){
+        document.getElementById('gameStatus').textContent = '🏆 Amazing memory! You completed it!';
+        return;
+      }
+      const colors = ['red','green','teal','gold'];
+      simonState.sequence.push(colors[randInt(0,3)]);
+      document.getElementById('gameStatus').textContent = 'Nice! Get ready for the next round...';
+      setTimeout(()=>playSimonSequence(), 900);
+    }
+  } else {
+    document.getElementById('gameStatus').textContent = '❌ Oops, that broke the pattern. Try again!';
+    simonState.sequence = [simonState.sequence[0]];
+    setTimeout(()=>playSimonSequence(), 1000);
+  }
+}
+</script>
+</body>
+</html>

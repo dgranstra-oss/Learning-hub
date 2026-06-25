@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bentley's Reading & Grammar Lab</title>
+<style>
+  :root{
+    --navy:#1a1a1a;
+    --gold:#e63946;
+    --teal:#4a4a4a;
+    --cream:#f5f1ee;
+    --red:#d62828;
+    --green:#3aa655;
+    --purple:#2b2b2b;
+    --blue:#2b6cb0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+    background:linear-gradient(160deg, #1a0000 0%, #4a0404 35%, #7a0c0c 65%, #1a0000 100%);
+    color:var(--navy);
+    padding:24px;
+    min-height:100vh;
+  }
+  a.backlink{
+    display:inline-block;
+    color:#f4a8a8;
+    font-weight:bold;
+    text-decoration:none;
+    margin-bottom:10px;
+  }
+  .header{
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .header h1{
+    font-size:2.1em;
+    margin:0;
+    color:#ffffff;
+    text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .header p{
+    color:#f4a8a8;
+    font-weight:bold;
+    margin:6px 0 0;
+  }
+  .stats{
+    display:flex;
+    justify-content:center;
+    gap:24px;
+    margin-bottom:24px;
+    flex-wrap:wrap;
+  }
+  .stat{
+    background:white;
+    border:3px solid var(--navy);
+    border-radius:12px;
+    padding:10px 18px;
+    text-align:center;
+    min-width:110px;
+  }
+  .stat .num{
+    font-size:1.6em;
+    font-weight:bold;
+    color:var(--navy);
+  }
+  .stat .label{
+    font-size:0.85em;
+    color:var(--teal);
+    font-weight:bold;
+  }
+  .card{
+    max-width:620px;
+    margin:0 auto;
+    background:white;
+    border:4px solid var(--navy);
+    border-radius:20px;
+    padding:28px 26px;
+    text-align:left;
+  }
+  .tag{
+    display:inline-block;
+    background:var(--purple);
+    color:white;
+    font-size:0.8em;
+    font-weight:bold;
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:14px;
+    letter-spacing:0.5px;
+  }
+  .passage-box{
+    background:var(--cream);
+    border-left:5px solid var(--gold);
+    border-radius:8px;
+    padding:16px 18px;
+    margin-bottom:18px;
+    font-size:1em;
+    line-height:1.6;
+    text-align:left;
+  }
+  .qtext{
+    font-size:1.25em;
+    font-weight:bold;
+    margin:0 0 18px;
+    text-align:left;
+    line-height:1.4;
+  }
+  .choice-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .choice-btn{
+    background:white;
+    border:3px solid var(--teal);
+    border-radius:12px;
+    padding:12px 16px;
+    cursor:pointer;
+    font-size:1em;
+    text-align:left;
+    line-height:1.4;
+    transition:transform 0.1s, border-color 0.15s;
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+  }
+  .choice-btn:hover{
+    transform:translateX(2px);
+    border-color:var(--blue);
+  }
+  .choice-btn.picked-correct{
+    border-color:var(--green);
+    background:#d4f5e1;
+  }
+  .choice-btn.picked-wrong{
+    border-color:var(--red);
+    background:#fbe1e1;
+  }
+  .choice-btn:disabled{ cursor:default; }
+  .actions{
+    margin-top:18px;
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  button{
+    border:none;
+    border-radius:10px;
+    padding:12px 22px;
+    font-size:1.05em;
+    font-weight:bold;
+    cursor:pointer;
+  }
+  #nextBtn{ background:var(--gold); color:white; display:none; }
+  #nextBtn:hover{ background:#c0202d; }
+  .feedback{
+    margin-top:14px;
+    font-size:1.2em;
+    font-weight:bold;
+    min-height:28px;
+    text-align:center;
+  }
+  .correct{ color:var(--green); }
+  .incorrect{ color:var(--red); }
+  .explain{
+    margin-top:14px;
+    background:#fff4e0;
+    border-left:5px solid var(--gold);
+    border-radius:8px;
+    padding:12px 16px;
+    text-align:left;
+    font-size:1em;
+    display:none;
+  }
+  .explain.show{ display:block; }
+  .topics{
+    text-align:center;
+    margin-top:24px;
+    font-size:0.9em;
+    color:#e3b8b8;
+  }
+  .overlay{
+    display:none;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(27,42,74,0.85);
+    z-index:999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .overlay.show{ display:flex; }
+  .game-card{
+    background:var(--cream);
+    border:5px solid var(--gold);
+    border-radius:20px;
+    padding:24px;
+    max-width:480px;
+    width:100%;
+    text-align:center;
+  }
+  .game-card h2{ margin:0 0 6px; color:var(--navy); }
+  .game-card .sub{ color:var(--purple); font-weight:bold; margin-bottom:16px; }
+  .memory-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:400px;
+  }
+  .memory-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.8em;
+    cursor:pointer;
+    user-select:none;
+    transition:transform 0.15s;
+  }
+  .memory-tile.flipped{ background:white; border:3px solid var(--teal); }
+  .memory-tile.matched{ background:#d4f5e1; border:3px solid var(--green); cursor:default; }
+  .game-status{ font-weight:bold; color:var(--navy); margin-bottom:14px; min-height:24px; }
+  .closeGameBtn{ background:var(--teal); color:white; }
+  .closeGameBtn:hover{ background:#239e92; }
+  .simon-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:280px;
+  }
+  .simon-tile{
+    aspect-ratio:1/1;
+    border-radius:16px;
+    cursor:pointer;
+    opacity:0.55;
+    transition:opacity 0.15s, transform 0.1s;
+  }
+  .simon-tile.lit{ opacity:1; transform:scale(0.96); }
+  .simon-tile.red{ background:#d62828; }
+  .simon-tile.green{ background:#2a9d8f; }
+  .simon-tile.teal{ background:#1d3557; }
+  .simon-tile.gold{ background:#e9c46a; }
+  .seq-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    margin:0 auto 18px;
+    max-width:400px;
+  }
+  .seq-tile{
+    aspect-ratio:1/1;
+    background:var(--navy);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.6em;
+    font-weight:bold;
+    cursor:pointer;
+    user-select:none;
+  }
+  .seq-tile.used{ background:#d4f5e1; color:var(--green); cursor:default; }
+  .seq-tile.wrong{ background:var(--red); }
+</style>
+</head>
+<body>
+
+<a class="backlink" href="bentley_hub.html">&larr; Back to profile</a>
+<div class="header">
+  <h1>📚 Bentley's Reading & Grammar Lab</h1>
+  <p>Passages • Comprehension • Grammar • Vocabulary — 5th/6th grade level</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="scoreNum">0</div><div class="label">Correct</div></div>
+  <div class="stat"><div class="num" id="attemptNum">0</div><div class="label">Attempted</div></div>
+  <div class="stat"><div class="num" id="streakNum">0</div><div class="label">Streak 🔥</div></div>
+  <div class="stat"><div class="num" id="bestNum">0</div><div class="label">Best Streak</div></div>
+</div>
+
+<div class="card">
+  <div class="tag" id="tag">TOPIC</div>
+  <div id="passageBox" class="passage-box" style="display:none;"></div>
+  <div class="qtext" id="qtext">Loading...</div>
+  <div class="choice-grid" id="choiceGrid"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="explain" id="explainBox"></div>
+  <div class="actions">
+    <button id="skipBtn" onclick="skipProblem()">Skip</button>
+    <button id="nextBtn" onclick="nextProblem()">Next Question →</button>
+  </div>
+</div>
+
+<div class="topics">New passages and grammar questions keep coming — keep going as long as you like!</div>
+
+<div class="overlay" id="rewardOverlay">
+  <div class="game-card">
+    <h2 id="gameTitle">🎉 12 in a Row!</h2>
+    <div class="sub" id="gameSub">You unlocked a game!</div>
+    <div class="game-status" id="gameStatus">Find all the matching pairs!</div>
+    <div id="gameContent"></div>
+    <button class="closeGameBtn" id="backToReadingBtn" onclick="closeRewardGame()">Back to Reading →</button>
+  </div>
+</div>
+
+<script>
+let score = 0, attempts = 0, streak = 0, best = 0;
+let current = null;
+let misses = 0;
+let pool = [];
+let queueIdx = 0;
+
+function randInt(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ===== Reading passages with comprehension questions =====
+const PASSAGES = [
+  {
+    text: "Honeybees do more than make honey — they pollinate nearly a third of the food we eat. In recent years, beekeepers have noticed colonies vanishing without explanation, a problem scientists now call colony collapse disorder. Pesticides, disease, and loss of wildflowers are all suspected causes. Without bees to carry pollen between flowers, crops like almonds, apples, and blueberries would struggle to grow. Some farmers have begun planting wildflower strips near their fields, hoping to give bees more food and a safer place to live. Scientists are also breeding bees that resist disease better. The disappearance of bees might seem like a small problem, but it could have a major effect on the food supply for millions of people.",
+    questions: [
+      {
+        q: "What is this passage mostly about?",
+        choices: ["How honey is made", "Why bees are disappearing and why it matters", "The life cycle of a flower", "How farmers grow almonds"],
+        ans: 1,
+        explain: "<div class=\"vlabel\">The main idea is the big-picture point of the whole passage, not just one detail. Every paragraph connects back to bees vanishing and why that matters for our food supply.</div>"
+      },
+      {
+        q: "In this passage, the word \"pollinate\" most likely means",
+        choices: ["to eat", "to carry pollen between flowers so plants can grow", "to build a hive", "to spray with pesticide"],
+        ans: 1,
+        explain: "<div class=\"vlabel\">Look at the sentence right after it: bees \"carry pollen between flowers,\" and without that, crops \"would struggle to grow.\" That context tells you what pollinate means.</div>"
+      }
+    ]
+  },
+  {
+    text: "Maya's grandfather had promised to build a treehouse the summer she turned eleven, and now, finally, the boards were nailed in place. She climbed the rickety ladder, her hands trembling slightly, and pulled herself onto the platform. The view stretched over the entire backyard — the garden, the fence, even the roof of her house. \"Well?\" her grandfather called from below, wiping sawdust from his hands. Maya grinned so wide her cheeks ached. \"It's perfect,\" she said, though privately she thought it was even better than the pictures she'd imagined for months. That night, she begged to sleep up there, blanket and flashlight in hand, refusing to come down until the stars came out.",
+    questions: [
+      {
+        q: "How does Maya most likely feel about the treehouse?",
+        choices: ["Disappointed", "Thrilled and proud", "Bored", "Nervous about heights"],
+        ans: 1,
+        explain: "<div class=\"vlabel\">The author doesn't say \"Maya was happy\" directly — you have to infer it from clues: she grinned so wide her cheeks ached, and she begged to sleep up there. Those actions show excitement.</div>"
+      },
+      {
+        q: "What did Maya do right after her grandfather asked \"Well?\"",
+        choices: ["She climbed down", "She grinned and said it was perfect", "She cried", "She asked for paint"],
+        ans: 1,
+        explain: "<div class=\"vlabel\">This is a detail question — the answer is stated directly in the text: \"Maya grinned so wide her cheeks ached. 'It's perfect,' she said.\"</div>"
+      }
+    ]
+  },
+  {
+    text: "Deep beneath the Earth's crust, intense heat melts rock into a thick liquid called magma. Because magma is lighter than the solid rock around it, it slowly rises through cracks toward the surface. As it nears the top, gases trapped inside the magma expand rapidly, building enormous pressure. When that pressure becomes too great for the rock above to contain, the volcano erupts, sending ash, gas, and lava bursting into the sky. Some eruptions happen quietly, with lava oozing out like thick syrup. Others are explosive, hurling rock and ash for miles. After an eruption, the lava eventually cools and hardens, sometimes creating new land entirely.",
+    questions: [
+      {
+        q: "According to the passage, what happens right before a volcano erupts?",
+        choices: ["Magma cools and hardens", "Gases expand and build pressure", "New land forms", "Ash falls from the sky"],
+        ans: 1,
+        explain: "<div class=\"vlabel\">This is a sequence question. Trace the order in the passage: magma rises → gases expand and build pressure → the volcano erupts. Pressure-building comes right before the eruption.</div>"
+      },
+      {
+        q: "In this passage, \"magma\" refers to",
+        choices: ["Cooled rock", "Melted rock beneath the surface", "Volcanic ash", "A type of gas"],
+        ans: 1,
+        explain: "<div class=\"vlabel\">The first sentence defines it directly: \"intense heat melts rock into a thick liquid called magma.\" That's melted rock beneath the surface.</div>"
+      }
+    ]
+  },
+  {
+    text: "Down by two goals with only ten minutes left, the Eagles looked finished. Coach Ramirez called a timeout, kneeling so the team could hear him over the crowd. \"You're not playing like yourselves,\" he said. \"Stop watching the clock and start watching each other.\" Something shifted after that. Jordan found an opening and slipped a pass through to Priya, who buried it in the corner of the net. Minutes later, a scramble in front of the goal ended with the ball bouncing off three players before trickling across the line. Tied game. In the final seconds, Jordan received the ball at the edge of the box and, without thinking twice, fired it past the keeper. The whistle blew. The Eagles had done the impossible.",
+    questions: [
+      {
+        q: "What lesson does this passage best support?",
+        choices: ["Winning doesn't matter", "Teamwork and not giving up can lead to success", "Coaches should never call timeouts", "Soccer games are usually boring"],
+        ans: 1,
+        explain: "<div class=\"vlabel\">The theme is the lesson behind the story. The coach tells them to watch each other, the team works together for two goals, and they come back from behind — that all points to teamwork and persistence.</div>"
+      },
+      {
+        q: "Who scored the final, game-winning goal?",
+        choices: ["Coach Ramirez", "Priya", "Jordan", "The keeper"],
+        ans: 2,
+        explain: "<div class=\"vlabel\">This detail is stated directly: \"Jordan received the ball... fired it past the keeper.\" Priya scored the first goal, not the final one.</div>"
+      }
+    ]
+  },
+  {
+    text: "Every year, people throw away millions of tons of plastic, paper, and metal that could be reused instead of buried in landfills. Recycling reduces the need to extract new raw materials, which saves energy and protects natural habitats. For example, recycling one aluminum can saves enough energy to power a television for several hours. Paper recycling reduces the number of trees cut down, helping forests stay healthy for the animals that depend on them. While recycling alone won't solve every environmental problem, it's a simple habit that adds up when millions of people do it together. The next time you're about to toss something in the trash, it's worth asking whether it belongs in the recycling bin instead.",
+    questions: [
+      {
+        q: "Why did the author most likely write this passage?",
+        choices: ["To entertain readers with a story", "To persuade readers that recycling is a simple, valuable habit", "To explain how landfills are built", "To criticize people who don't recycle"],
+        ans: 1,
+        explain: "<div class=\"vlabel\">This is an author's purpose question. The passage gives reasons recycling helps, then directly suggests readers think twice before throwing things away — that's persuasive writing, not a story or a criticism.</div>"
+      },
+      {
+        q: "According to the passage, what does recycling an aluminum can save?",
+        choices: ["Trees", "Water", "Enough energy to power a TV for hours", "Plastic"],
+        ans: 2,
+        explain: "<div class=\"vlabel\">This detail is stated directly: \"recycling one aluminum can saves enough energy to power a television for several hours.\" Trees are mentioned, but in connection with paper, not aluminum.</div>"
+      }
+    ]
+  }
+];
+
+// ===== Standalone grammar questions =====
+const GRAMMAR = [
+  { q: "Which sentence uses correct subject-verb agreement?",
+    choices: ["The dog and the cats is sleeping.", "The dog and the cats are sleeping.", "The dog and the cats was sleeping.", "The dog and the cats be sleeping."],
+    ans: 1, explain: "<div class=\"vlabel\">\"The dog and the cats\" is a compound subject (more than one thing), so it needs the plural verb \"are,\" not \"is\" or \"was.\"</div>" },
+  { q: "Choose the correctly punctuated sentence.",
+    choices: ["I need eggs milk and bread.", "I need eggs, milk, and bread.", "I need eggs, milk and, bread.", "I need, eggs milk and bread."],
+    ans: 1, explain: "<div class=\"vlabel\">In a list of three or more items, put a comma after each item except the last: \"eggs, milk, and bread.\"</div>" },
+  { q: "Which word correctly completes the sentence? \"Neither of the boys ___ finished his homework.\"",
+    choices: ["have", "has", "having", "had been"],
+    ans: 1, explain: "<div class=\"vlabel\">\"Neither\" is singular, even though it's talking about two boys, so it needs the singular verb \"has,\" not \"have.\"</div>" },
+  { q: "Identify the adverb in this sentence: \"She quickly finished her homework before dinner.\"",
+    choices: ["quickly", "finished", "homework", "dinner"],
+    ans: 0, explain: "<div class=\"vlabel\">An adverb describes how an action happens. \"Quickly\" describes how she finished her homework.</div>" },
+  { q: "Which sentence correctly uses an apostrophe?",
+    choices: ["The dogs' bone was buried.", "The dog's bone was buried.", "The dogs bone's was buried.", "The dog bones' was buried."],
+    ans: 1, explain: "<div class=\"vlabel\">Since there's one dog that owns the bone, the apostrophe goes before the s: \"dog's.\" \"Dogs'\" would mean more than one dog.</div>" },
+  { q: "Choose the correct homophone: \"I can't decide ___ shoes to wear.\"",
+    choices: ["witch", "which", "whitch", "wich"],
+    ans: 1, explain: "<div class=\"vlabel\">\"Which\" is used to ask a question about choosing between options. \"Witch\" refers to a person in folklore — a totally different word.</div>" },
+  { q: "Which sentence is NOT a run-on?",
+    choices: ["I was tired I went to bed early.", "I was tired, so I went to bed early.", "I was tired so I went, to bed early.", "I was tired I, went to bed, early."],
+    ans: 1, explain: "<div class=\"vlabel\">A run-on happens when two complete sentences are jammed together without proper punctuation. Adding a comma and the joining word \"so\" correctly connects the two ideas.</div>" },
+  { q: "Which word is a proper noun?",
+    choices: ["city", "Chicago", "building", "river"],
+    ans: 1, explain: "<div class=\"vlabel\">Proper nouns name a specific person, place, or thing and are capitalized. \"Chicago\" names a specific city; the others are general nouns.</div>" },
+  { q: "Choose the sentence with the correct verb tense: \"Yesterday, she ___ to the store.\"",
+    choices: ["go", "goes", "went", "going"],
+    ans: 2, explain: "<div class=\"vlabel\">\"Yesterday\" tells you the action already happened, so you need the past tense verb \"went,\" not the present tense \"go\" or \"goes.\"</div>" },
+  { q: "Which sentence uses \"their,\" \"there,\" or \"they're\" correctly?",
+    choices: ["Their going to the park.", "They're going to the park.", "There going to the park.", "Theyre going to the park."],
+    ans: 1, explain: "<div class=\"vlabel\">\"They're\" is short for \"they are.\" Since the sentence means \"they are going,\" \"they're\" is correct. \"Their\" shows ownership, and \"there\" is a place.</div>" },
+  { q: "Identify the simple subject in this sentence: \"The tall, old oak tree fell during the storm.\"",
+    choices: ["tall", "old", "tree", "storm"],
+    ans: 2, explain: "<div class=\"vlabel\">The simple subject is the main noun the sentence is about, without its describing words. \"Tall\" and \"old\" describe the tree, but \"tree\" is the actual subject doing the falling.</div>" },
+  { q: "Which sentence correctly uses a comma with an introductory phrase?",
+    choices: ["After the long race the runners rested.", "After the long race, the runners rested.", "After, the long race the runners rested.", "After the long, race the runners rested."],
+    ans: 1, explain: "<div class=\"vlabel\">When a sentence starts with an introductory phrase like \"After the long race,\" put a comma right after the phrase, before the main part of the sentence begins.</div>" },
+  { q: "Choose the sentence with correct capitalization.",
+    choices: ["we visited paris last Summer.", "We visited Paris last summer.", "We Visited paris last summer.", "we Visited Paris last Summer."],
+    ans: 1, explain: "<div class=\"vlabel\">Capitalize the first word of a sentence and proper nouns like \"Paris.\" Seasons like \"summer\" are not capitalized unless they start the sentence.</div>" },
+  { q: "Which word in this sentence is a conjunction? \"I wanted to go outside, but it started raining.\"",
+    choices: ["wanted", "outside", "but", "raining"],
+    ans: 2, explain: "<div class=\"vlabel\">A conjunction joins two ideas together. \"But\" connects \"I wanted to go outside\" with \"it started raining.\"</div>" }
+];
+
+// ===== Vocabulary building =====
+const VOCAB = [
+  { q: "In the sentence \"The detective made an astute observation that solved the case,\" what does \"astute\" most likely mean?",
+    choices: ["Careless", "Clever and perceptive", "Loud", "Confused"],
+    ans: 1, explain: "<div class=\"vlabel\">Context clue: the observation \"solved the case,\" which means it was sharp and insightful — that's what \"astute\" means.</div>" },
+  { q: "Which word is a synonym for \"reluctant\"?",
+    choices: ["Eager", "Hesitant", "Angry", "Tired"],
+    ans: 1, explain: "<div class=\"vlabel\">A synonym means almost the same thing. \"Reluctant\" and \"hesitant\" both describe being unwilling or unsure about doing something.</div>" },
+  { q: "Which word is an antonym for \"generous\"?",
+    choices: ["Selfish", "Kind", "Wealthy", "Helpful"],
+    ans: 0, explain: "<div class=\"vlabel\">An antonym means the opposite. \"Generous\" means giving freely, so its opposite is \"selfish.\"</div>" },
+  { q: "The prefix \"mis-\" usually means",
+    choices: ["Before", "Wrongly", "Again", "Under"],
+    ans: 1, explain: "<div class=\"vlabel\">\"Mis-\" means \"wrongly\" or \"badly.\" Think of \"misunderstand\" (to understand wrongly) or \"mistake.\"</div>" },
+  { q: "Which word means \"to make something larger\"?",
+    choices: ["Diminish", "Reduce", "Expand", "Shrink"],
+    ans: 2, explain: "<div class=\"vlabel\">\"Expand\" means to grow or increase in size. The other words all mean to make something smaller.</div>" },
+  { q: "The root word \"spect\" (as in \"inspect\" or \"spectator\") relates to",
+    choices: ["Sound", "Sight or seeing", "Touch", "Taste"],
+    ans: 1, explain: "<div class=\"vlabel\">\"Spect\" comes from Latin meaning \"to look\" or \"see.\" A spectator watches a game; to inspect is to look closely.</div>" },
+  { q: "In the sentence \"Her cryptic message left everyone puzzled,\" what does \"cryptic\" mean?",
+    choices: ["Mysterious or hard to understand", "Cheerful", "Loud", "Short"],
+    ans: 0, explain: "<div class=\"vlabel\">Context clue: the message \"left everyone puzzled,\" which tells you \"cryptic\" means confusing or hard to figure out.</div>" },
+  { q: "Which suffix means \"full of\"?",
+    choices: ["-less", "-ful", "-able", "-ist"],
+    ans: 1, explain: "<div class=\"vlabel\">\"-ful\" means \"full of.\" For example, \"joyful\" means full of joy. \"-less\" means without, the opposite.</div>" },
+  { q: "Which word is a synonym for \"enormous\"?",
+    choices: ["Tiny", "Massive", "Ordinary", "Quiet"],
+    ans: 1, explain: "<div class=\"vlabel\">\"Enormous\" and \"massive\" both describe something extremely large in size.</div>" },
+  { q: "The prefix \"sub-\" usually means",
+    choices: ["Above", "Under or below", "Around", "Against"],
+    ans: 1, explain: "<div class=\"vlabel\">\"Sub-\" means \"under\" or \"below.\" Think of \"submarine\" (under the marine/sea) or \"subway\" (under the way/street).</div>" },
+  { q: "Which word means the opposite of \"transparent\"?",
+    choices: ["Clear", "See-through", "Opaque", "Shiny"],
+    ans: 2, explain: "<div class=\"vlabel\">\"Transparent\" means you can see through something. \"Opaque\" means light can't pass through it — the opposite.</div>" },
+  { q: "In the sentence \"The teacher's stern look silenced the class,\" what does \"stern\" mean?",
+    choices: ["Serious or strict", "Friendly", "Funny", "Tired"],
+    ans: 0, explain: "<div class=\"vlabel\">Context clue: the look \"silenced the class,\" which suggests something serious and strict, not friendly or funny.</div>" },
+  { q: "The root word \"bene\" (as in \"benefit\" or \"benevolent\") relates to",
+    choices: ["Bad", "Good", "Large", "Small"],
+    ans: 1, explain: "<div class=\"vlabel\">\"Bene\" comes from Latin meaning \"good\" or \"well.\" A benefit is something good you receive; benevolent means kind and good-natured.</div>" },
+  { q: "Which word is an antonym for \"abundant\"?",
+    choices: ["Plentiful", "Scarce", "Huge", "Common"],
+    ans: 1, explain: "<div class=\"vlabel\">\"Abundant\" means there's a lot of something. \"Scarce\" means there's very little — the opposite.</div>" }
+];
+
+function buildPool(){
+  pool = [];
+  PASSAGES.forEach(p => {
+    p.questions.forEach(q => {
+      pool.push({
+        tag: 'COMPREHENSION',
+        passage: p.text,
+        text: q.q,
+        choices: q.choices.map((c, i) => ({ value: i, label: c })),
+        ans: q.ans,
+        explain: q.explain
+      });
+    });
+  });
+  GRAMMAR.forEach(g => {
+    pool.push({
+      tag: 'GRAMMAR',
+      passage: null,
+      text: g.q,
+      choices: g.choices.map((c, i) => ({ value: i, label: c })),
+      ans: g.ans,
+      explain: g.explain
+    });
+  });
+  VOCAB.forEach(v => {
+    pool.push({
+      tag: 'VOCABULARY',
+      passage: null,
+      text: v.q,
+      choices: v.choices.map((c, i) => ({ value: i, label: c })),
+      ans: v.ans,
+      explain: v.explain
+    });
+  });
+  pool = shuffle(pool);
+  queueIdx = 0;
+}
+
+function skipProblem(){
+  nextProblem();
+}
+
+function nextProblem(){
+  if (queueIdx >= pool.length) {
+    pool = shuffle(pool);
+    queueIdx = 0;
+  }
+  current = pool[queueIdx];
+  queueIdx++;
+  misses = 0;
+
+  document.getElementById('tag').textContent = current.tag;
+  const passageBox = document.getElementById('passageBox');
+  if (current.passage) {
+    passageBox.style.display = 'block';
+    passageBox.textContent = current.passage;
+  } else {
+    passageBox.style.display = 'none';
+    passageBox.textContent = '';
+  }
+  document.getElementById('qtext').textContent = current.text;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('explainBox').classList.remove('show');
+  document.getElementById('nextBtn').style.display = 'none';
+
+  const choiceGrid = document.getElementById('choiceGrid');
+  choiceGrid.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  current.choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<b>${letters[i]})</b> ${choice.label}`;
+    btn.onclick = () => selectChoice(choice.value, btn);
+    choiceGrid.appendChild(btn);
+  });
+}
+
+function selectChoice(val, clickedBtn){
+  const fb = document.getElementById('feedback');
+  const ex = document.getElementById('explainBox');
+
+  if (val === current.ans) {
+    attempts++;
+    score++; streak++;
+    if (streak > best) best = streak;
+    clickedBtn.classList.add('picked-correct');
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    fb.textContent = '✅ Correct!';
+    fb.className = 'feedback correct';
+    ex.classList.remove('show');
+    updateStats();
+    document.getElementById('nextBtn').style.display = 'inline-block';
+  } else {
+    misses++;
+    clickedBtn.classList.add('picked-wrong');
+    clickedBtn.disabled = true;
+    if (misses >= 2) {
+      attempts++;
+      streak = 0;
+      document.querySelectorAll('.choice-btn').forEach((b, i) => {
+        b.disabled = true;
+        if (current.choices[i].value === current.ans) b.classList.add('picked-correct');
+      });
+      fb.textContent = "❌ Not quite — here's the breakdown:";
+      fb.className = 'feedback incorrect';
+      ex.innerHTML = current.explain;
+      ex.classList.add('show');
+      updateStats();
+      document.getElementById('nextBtn').style.display = 'inline-block';
+    } else {
+      fb.textContent = 'Not quite — try again!';
+      fb.className = 'feedback incorrect';
+    }
+  }
+}
+
+function updateStats(){
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('attemptNum').textContent = attempts;
+  document.getElementById('streakNum').textContent = streak;
+  document.getElementById('bestNum').textContent = best;
+  if (streak > 0 && streak % 12 === 0) {
+    openRewardGame();
+  }
+}
+
+// ---- Reward Games (rotates through 3 different mini-games) ----
+let rewardCount = 0;
+const EMOJIS = ['🚀','⭐','🐉','🍕','🎲','🦄','🌈','🎮'];
+let memState = { first:null, lock:false, matchedCount:0 };
+let seqState = { next:1 };
+let simonState = { sequence:[], playerStep:0, playing:false };
+
+function openRewardGame(){
+  const overlay = document.getElementById('rewardOverlay');
+  overlay.classList.add('show');
+  const gameType = rewardCount % 3;
+  rewardCount++;
+  if(gameType === 0) setupMemoryGame();
+  else if(gameType === 1) setupSequenceGame();
+  else setupSimonGame();
+}
+
+function closeRewardGame(){
+  document.getElementById('rewardOverlay').classList.remove('show');
+  simonState.playing = false;
+}
+
+function setupMemoryGame(){
+  document.getElementById('gameTitle').textContent = '🎉 12 in a Row!';
+  document.getElementById('gameSub').textContent = 'You unlocked Memory Match!';
+  document.getElementById('gameStatus').textContent = 'Find all the matching pairs!';
+  const chosen = [...EMOJIS].sort(()=>Math.random()-0.5).slice(0,6);
+  let deck = [...chosen, ...chosen].sort(()=>Math.random()-0.5);
+  memState = { first:null, lock:false, matchedCount:0 };
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="memory-grid" id="memoryGrid"></div>';
+  const grid = document.getElementById('memoryGrid');
+  deck.forEach((emoji, idx)=>{
+    const tile = document.createElement('div');
+    tile.className = 'memory-tile';
+    tile.dataset.idx = idx;
+    tile.dataset.emoji = emoji;
+    tile.textContent = '❓';
+    tile.onclick = ()=>flipTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function flipTile(tile){
+  if(memState.lock) return;
+  if(tile.classList.contains('flipped') || tile.classList.contains('matched')) return;
+  tile.classList.add('flipped');
+  tile.textContent = tile.dataset.emoji;
+  if(memState.first === null){
+    memState.first = tile;
+  } else {
+    const first = memState.first, second = tile;
+    if(first.dataset.emoji === second.dataset.emoji){
+      first.classList.add('matched');
+      second.classList.add('matched');
+      memState.first = null;
+      memState.matchedCount++;
+      if(memState.matchedCount === 6){
+        document.getElementById('gameStatus').textContent = '🏆 You matched them all! Great job!';
+      }
+    } else {
+      memState.lock = true;
+      setTimeout(()=>{
+        first.classList.remove('flipped'); first.textContent = '❓';
+        second.classList.remove('flipped'); second.textContent = '❓';
+        memState.first = null; memState.lock = false;
+      }, 700);
+    }
+  }
+}
+
+function setupSequenceGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Another Streak!';
+  document.getElementById('gameSub').textContent = 'You unlocked Number Rush!';
+  document.getElementById('gameStatus').textContent = 'Click the numbers 1 → 12 in order, as fast as you can!';
+  seqState = { next:1 };
+  const nums = Array.from({length:12}, (_,i)=>i+1).sort(()=>Math.random()-0.5);
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="seq-grid" id="seqGrid"></div>';
+  const grid = document.getElementById('seqGrid');
+  nums.forEach(n=>{
+    const tile = document.createElement('div');
+    tile.className = 'seq-tile';
+    tile.textContent = n;
+    tile.dataset.num = n;
+    tile.onclick = ()=>clickSeqTile(tile);
+    grid.appendChild(tile);
+  });
+}
+
+function clickSeqTile(tile){
+  const num = Number(tile.dataset.num);
+  if(tile.classList.contains('used')) return;
+  if(num === seqState.next){
+    tile.classList.add('used');
+    seqState.next++;
+    if(seqState.next === 13){
+      document.getElementById('gameStatus').textContent = '🏆 Awesome! You got them all in order!';
+    }
+  } else {
+    tile.classList.add('wrong');
+    setTimeout(()=>tile.classList.remove('wrong'), 300);
+  }
+}
+
+function setupSimonGame(){
+  document.getElementById('gameTitle').textContent = '🎉 Streak Power!';
+  document.getElementById('gameSub').textContent = 'You unlocked Color Memory!';
+  document.getElementById('gameStatus').textContent = 'Watch the pattern, then repeat it!';
+  simonState = { sequence:[], playerStep:0, playing:false };
+  const colors = ['red','green','teal','gold'];
+  const content = document.getElementById('gameContent');
+  content.innerHTML = '<div class="simon-grid" id="simonGrid"></div>';
+  const grid = document.getElementById('simonGrid');
+  colors.forEach(c=>{
+    const tile = document.createElement('div');
+    tile.className = 'simon-tile ' + c;
+    tile.dataset.color = c;
+    tile.onclick = ()=>simonClick(tile);
+    grid.appendChild(tile);
+  });
+  simonState.sequence = [colors[randInt(0,3)]];
+  setTimeout(()=>playSimonSequence(), 600);
+}
+
+function playSimonSequence(){
+  simonState.playing = true;
+  simonState.playerStep = 0;
+  document.getElementById('gameStatus').textContent = 'Watch closely...';
+  const grid = document.getElementById('simonGrid');
+  let i = 0;
+  const interval = setInterval(()=>{
+    if(i > 0){
+      const prevTile = grid.querySelector(`[data-color="${simonState.sequence[i-1]}"]`);
+      if(prevTile) prevTile.classList.remove('lit');
+    }
+    if(i >= simonState.sequence.length){
+      clearInterval(interval);
+      simonState.playing = false;
+      document.getElementById('gameStatus').textContent = `Your turn! Repeat the pattern (${simonState.sequence.length} step${simonState.sequence.length>1?'s':''}).`;
+      return;
+    }
+    const tile = grid.querySelector(`[data-color="${simonState.sequence[i]}"]`);
+    if(tile) tile.classList.add('lit');
+    i++;
+  }, 700);
+}
+
+function simonClick(tile){
+  if(simonState.playing) return;
+  const color = tile.dataset.color;
+  tile.classList.add('lit');
+  setTimeout(()=>tile.classList.remove('lit'), 250);
+  if(color === simonState.sequence[simonState.playerStep]){
+    simonState.playerStep++;
+    if(simonState.playerStep === simonState.sequence.length){
+      if(simonState.sequence.length >= 6){
+        document.getElementById('gameStatus').textContent = '🏆 Amazing memory! You completed it!';
+        return;
+      }
+      const colors = ['red','green','teal','gold'];
+      simonState.sequence.push(colors[randInt(0,3)]);
+      document.getElementById('gameStatus').textContent = 'Nice! Get ready for the next round...';
+      setTimeout(()=>playSimonSequence(), 900);
+    }
+  } else {
+    document.getElementById('gameStatus').textContent = '❌ Oops, that broke the pattern. Try again!';
+    simonState.sequence = [simonState.sequence[0]];
+    setTimeout(()=>playSimonSequence(), 1000);
+  }
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  if(document.getElementById('rewardOverlay').classList.contains('show')){
+    closeRewardGame();
+    return;
+  }
+  if(document.getElementById('nextBtn').style.display !== 'none'){
+    nextProblem();
+  }
+});
+
+buildPool();
+nextProblem();
+</script>
+</body>
+</html>

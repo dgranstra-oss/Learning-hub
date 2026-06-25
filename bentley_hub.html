@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bentley's Learning Hub</title>
+<style>
+  :root{
+    --navy:#1a1a1a;
+    --gold:#e63946;
+    --teal:#4a4a4a;
+    --red:#d62828;
+    --purple:#2b2b2b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Trebuchet MS', Verdana, sans-serif;
+    background:linear-gradient(160deg, #1a0000 0%, #4a0404 35%, #7a0c0c 65%, #1a0000 100%);
+    color:var(--navy);
+    padding:24px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+  a.backlink{
+    position:fixed;
+    top:24px;
+    left:24px;
+    color:#f4a8a8;
+    font-weight:bold;
+    text-decoration:none;
+  }
+  .header{
+    text-align:center;
+    margin-bottom:42px;
+  }
+  .header h1{
+    font-size:2.4em;
+    margin:0;
+    color:#ffffff;
+    text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .header p{
+    color:#f4a8a8;
+    font-weight:bold;
+    margin:10px 0 0;
+    font-size:1.05em;
+  }
+  .tools{
+    display:flex;
+    justify-content:center;
+    gap:32px;
+    flex-wrap:wrap;
+    max-width:780px;
+    margin:0 auto;
+  }
+  .tool-card{
+    background:white;
+    border:4px solid var(--navy);
+    border-radius:24px;
+    padding:38px 32px;
+    text-align:center;
+    width:280px;
+    text-decoration:none;
+    color:var(--navy);
+    transition:transform 0.15s ease;
+  }
+  .tool-card:hover{ transform:translateY(-4px); }
+  .icon{ font-size:3em; margin-bottom:14px; }
+  .tool-card h2{ margin:0 0 8px; font-size:1.5em; }
+  .tool-card .sub{ color:var(--teal); font-size:0.95em; font-weight:bold; }
+  .tag{
+    display:inline-block;
+    background:var(--purple);
+    color:white;
+    font-size:0.85em;
+    font-weight:bold;
+    padding:5px 14px;
+    border-radius:20px;
+    margin-top:16px;
+  }
+</style>
+</head>
+<body>
+
+<a class="backlink" href="index.html">&larr; Home</a>
+
+<div class="header">
+  <h1>Bentley's Learning Hub</h1>
+  <p>Pick a tool to practice</p>
+</div>
+
+<div class="tools">
+  <a class="tool-card" href="bentley_math.html">
+    <div class="icon">🔢</div>
+    <h2>Math Mission</h2>
+    <div class="sub">Multiplication, division, fractions &amp; more</div>
+    <span class="tag">Math</span>
+  </a>
+
+  <a class="tool-card" href="bentley_reading.html">
+    <div class="icon">📚</div>
+    <h2>Reading &amp; Grammar</h2>
+    <div class="sub">Passages, comprehension, grammar &amp; vocabulary</div>
+    <span class="tag">Reading</span>
+  </a>
+</div>
+
+</body>
+</html>
